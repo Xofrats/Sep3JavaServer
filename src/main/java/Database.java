@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class Database {
 
-    public ArrayList getVenner() {
+    public ArrayList<Ven> getVenner() {
         ArrayList<Ven> venner = new ArrayList<Ven>();
         Connection c = null;
         Statement stmt = null;
