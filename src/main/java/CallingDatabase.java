@@ -8,11 +8,9 @@ public class CallingDatabase {
 
     }
 
-   public void WriteVenner() {
-       ArrayList<Ven> venner = database.getVenner();
-       for (Ven ven : venner
-       ) {
-           System.out.println(ven.toString());
-       }
+   public ArrayList<String> GetVenner() {
+       ArrayList<String> venner = database.getVenner();
+
+       return venner;
    }
 }

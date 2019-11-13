@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public class Database {
 
-    public ArrayList<Ven> getVenner() {
-        ArrayList<Ven> venner = new ArrayList<Ven>();
+    public ArrayList<String> getVenner() {
+        ArrayList<String> venner = new ArrayList<String>();
         Connection c = null;
         Statement stmt = null;
         try {
@@ -20,9 +20,9 @@ public class Database {
             ResultSet rs = stmt.executeQuery( "SELECT * FROM \"Sep3\".Venner;" );
             //Dette loop laver et spild objekt for hver eneste linje i tabellen
             while ( rs.next() ) {
-                String ID = rs.getString("ID");
+
                 String username = rs.getString("username");
-                venner.add(new Ven(ID, username));
+                venner.add(username);
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
