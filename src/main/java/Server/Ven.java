@@ -1,3 +1,5 @@
+package Server;
+
 public class Ven {
     String ID;
     String Username;
@@ -25,7 +27,7 @@ public class Ven {
 
     @Override
     public String toString() {
-        return "Ven{" +
+        return "Server.Ven{" +
                 "ID='" + ID + '\'' +
                 ", Username='" + Username + '\'' +
                 '}';
