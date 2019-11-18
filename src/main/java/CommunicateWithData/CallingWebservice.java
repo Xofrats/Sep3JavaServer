@@ -23,11 +23,9 @@ public class CallingWebservice {
     public ArrayList<String> getAllUsers() {
         GenericType<ArrayList<User>> userArrayListType = new GenericType<ArrayList<User>>() {
         };
-        System.out.println("Getting users");
 
         ArrayList<User> allUsers = target.path("users").request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
 
-        System.out.println("getting usernames");
         ArrayList<String> allNames = new ArrayList<>();
         for (User userList1 : allUsers) {
             System.out.println(userList1.toString());
