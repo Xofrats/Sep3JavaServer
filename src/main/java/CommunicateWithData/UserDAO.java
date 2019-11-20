@@ -31,17 +31,6 @@ public class UserDAO implements IUser {
         return user;
     }
 
-/*    @GET
-    @Path("/validate/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public User validereBruger(@PathParam("id") String brugernavn, String password) {
-        for(User user: userList) {
-            if (user.getPassword().equals(password) && user.getBrugernavn().equals(brugernavn))
-                return user;
-        }
-        return null;
-    }*/
-
 
     @PUT
     @Path("/changePW/{id}")

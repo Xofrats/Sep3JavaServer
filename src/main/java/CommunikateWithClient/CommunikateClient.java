@@ -1,7 +1,5 @@
 package CommunikateWithClient;
 
-import CommunicateWithData.CallingDatabase;
-
 import CommunicateWithData.CallingWebservice;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
