@@ -3,32 +3,28 @@ package CommunicateWithData;
 import java.util.Objects;
 
 public class User {
-    private int id;
-    private String brugernavn;
+
+    private String username;
     private String password;
 
     public User() {}
 
-    public User(int id, String brugernavn, String password) {
-        this.id = id;
-        this.brugernavn = brugernavn;
+    public User( String username, String password) {
+
+        this.username = username;
         this.password = password;
     }
 
-    public int getId() {
-        return id;
+
+
+
+
+    public String getUsername() {
+        return username;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getBrugernavn() {
-        return brugernavn;
-    }
-
-    public void setBrugernavn(String brugernavn) {
-        this.brugernavn = brugernavn;
+    public void setusername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -44,20 +40,20 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id &&
-                Objects.equals(brugernavn, user.brugernavn) &&
+        return
+                Objects.equals(username, user.username) &&
                 Objects.equals(password, user.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, brugernavn, password);
+        return Objects.hash( username, password);
     }
 
     @Override
     public String toString() {
-        return  "id: " + id +
-                "   brugernavn: " + brugernavn +
+        return
+                "   brugernavn: " + username +
                 "   password: " + password +
                 "\n";
     }
