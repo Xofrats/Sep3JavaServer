@@ -114,6 +114,7 @@ public class CommunikateClient implements Runnable {
                     outToClient.write(b);
                 }
             }
+            
         } catch (Exception e){
             e.printStackTrace();
             System.out.println("Client disconnected");
