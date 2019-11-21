@@ -69,7 +69,7 @@ public class CommunikateClient implements Runnable {
                     CallingWebservice database = new CallingWebservice();
 
                     //Den gemmer brugernavnene i en array
-                    ArrayList<String> venner = database.getAllUsers();
+                    ArrayList<String> venner = database.getAllFriends();
 
                     //Listen bliver gemt i et JSONobejktet under KEY'en Data
                     testingJson.put("data", venner);

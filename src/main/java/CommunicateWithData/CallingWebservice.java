@@ -20,16 +20,16 @@ public class CallingWebservice {
         target = client.target("http://localhost:8080/WebServices");
     }
 
-    public ArrayList<String> getAllUsers() {
-        GenericType<ArrayList<User>> userArrayListType = new GenericType<ArrayList<User>>() {
+    public ArrayList<String> getAllFriends() {
+        GenericType<ArrayList<Friend>> userArrayListType = new GenericType<ArrayList<Friend>>() {
         };
 
-        ArrayList<User> allUsers = target.path("users").request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
+        ArrayList<Friend> allUsers = target.path("friends").request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
 
         ArrayList<String> allNames = new ArrayList<>();
-        for (User userList1 : allUsers) {
-            System.out.println(userList1.toString());
-            allNames.add(userList1.getBrugernavn());
+        for (Friend friendList : allUsers) {
+            System.out.println(friendList.toString());
+            allNames.add(friendList.getUsername());
         }
         return allNames;
     }
