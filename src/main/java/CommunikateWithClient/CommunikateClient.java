@@ -55,7 +55,7 @@ public class CommunikateClient implements Runnable {
                     String WhatClientWrote = (String) jsonVersion.get("Chat");
                     //indtil videre laver den et echo
                     testingJson.put("name", WhatClientWrote);
-                    //JSON objektet bliver lavet om et en string og derefter en byte array
+                    //JSON objektet bliver lavet om til en string og derefter en byte array
                     String message = testingJson.toJSONString();
                     byte[] b = message.getBytes();
                     //Byte arrayen bliver sendt til klienten
@@ -63,6 +63,38 @@ public class CommunikateClient implements Runnable {
 
                    // CommunikateWithClient.CommunicateToAll all = new CommunikateWithClient.CommunicateToAll();
                    // all.talkToAll(message);
+                }
+
+                if (jsonString.equals("Add friend")) {
+
+                    //Serveren laver et objekt der kan snakke med webservicen
+                    CallingWebservice database = new CallingWebservice();
+
+                    //bruger metode fra webservice
+                    String venner = database.friendRequest();
+
+                    //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                    testingJson.put("name", venner);
+
+                    //JSON bliver lavet om til en string og der efter en byte array
+                    String message = testingJson.toJSONString();
+                    byte[] b = message.getBytes();
+
+                    //Byte arrayen bliver sendt til klienten
+                    outToClient.write(b);
+
+                }
+                if (jsonString.equals("Accepted")) {
+                    CallingWebservice database = new CallingWebservice();
+
+                    //Den gemmer brugernavnene i en array
+                    database.addFriend();
+                }
+                if (jsonString.equals("Delete friend")) {
+                    //Hvis klienten vil hente sin venne liste, laver serveren et objekt der kan snakke med webservicen
+                    CallingWebservice database = new CallingWebservice();
+                    //Den gemmer brugernavnene i en array
+                    database.deleteFriend();
 
                 } else {
                     //Hvis klienten vil hente sin venne liste, laver serveren et objekt der kan snakke med webservicen
@@ -81,9 +113,7 @@ public class CommunikateClient implements Runnable {
                     //Byte arrayen bliver sendt til klienten
                     outToClient.write(b);
                 }
-
             }
-
         } catch (Exception e){
             e.printStackTrace();
             System.out.println("Client disconnected");

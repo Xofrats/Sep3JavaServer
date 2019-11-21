@@ -4,6 +4,7 @@ import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -34,4 +35,19 @@ public class CallingWebservice {
         return allNames;
     }
 
+    public String friendRequest() {
+        //Får et objekt men skal bruge en string
+        return target.path("friends").path("AddFriend").request().accept(MediaType.APPLICATION_JSON).toString();
+    }
+
+    public void addFriend() {
+        //Hvordan får jeg owner i den 2. path
+        Friend friend = new Friend();
+        target.path("friends").path("").request(MediaType.APPLICATION_JSON).post(Entity.json(friend));
+    }
+
+    public void deleteFriend() {
+        //Hvordan får jeg username fra klienten
+        target.path("users").path("username").request().delete();
+    }
 }
