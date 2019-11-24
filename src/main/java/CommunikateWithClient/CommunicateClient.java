@@ -8,10 +8,10 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class CommunikateClient implements Runnable {
+public class CommunicateClient implements Runnable {
     private Socket client;
 
-    public CommunikateClient(Socket client) {
+    public CommunicateClient(Socket client) {
         this.client = client;
     }
 
@@ -28,15 +28,12 @@ public class CommunikateClient implements Runnable {
             //Laver en buffer der kan omskrive json til data stream
             BufferedReader r = new BufferedReader(new InputStreamReader(inFromClient, "US-ASCII"));
 
-            //En test af forbindelsen
-            testingJson.put("name", "Welcome");
-            String welcome = testingJson.toJSONString();
-            byte[] hey = welcome.getBytes();
-            outToClient.write(hey);
+
 
             while (true) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
                 String clientWant = r.readLine();
+                System.out.println("Got something from client");
 
                 //JSONparser kan oversætte JSON fra streamen til java
                 JSONParser parser = new JSONParser();
@@ -54,6 +51,7 @@ public class CommunikateClient implements Runnable {
                     //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                     String WhatClientWrote = (String) jsonVersion.get("Chat");
                     //indtil videre laver den et echo
+                    testingJson.put("function", "chat");
                     testingJson.put("name", WhatClientWrote);
                     //JSON objektet bliver lavet om til en string og derefter en byte array
                     String message = testingJson.toJSONString();
@@ -96,7 +94,8 @@ public class CommunikateClient implements Runnable {
                     //Den gemmer brugernavnene i en array
                     database.deleteFriend();
 
-                } else {
+                }
+                /*else {
                     //Hvis klienten vil hente sin venne liste, laver serveren et objekt der kan snakke med webservicen
                     CallingWebservice database = new CallingWebservice();
 
@@ -112,7 +111,7 @@ public class CommunikateClient implements Runnable {
 
                     //Byte arrayen bliver sendt til klienten
                     outToClient.write(b);
-                }
+                }*/
                 
             }
 

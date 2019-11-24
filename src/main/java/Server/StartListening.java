@@ -1,6 +1,6 @@
 package Server;
 
-import CommunikateWithClient.CommunikateClient;
+import CommunikateWithClient.CommunicateClient;
 
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -24,7 +24,7 @@ public class StartListening implements Runnable {
                 Socket client = welcomeSocket.accept();
                 System.out.println("Client connected");
                 //Når en client kobler på serveren oprettes der en ny tråd og serveren går tilbage og venter på nye klienter
-                Runnable CommunikateClient = new CommunikateClient(client);
+                Runnable CommunikateClient = new CommunicateClient(client);
                 new Thread(CommunikateClient).start();
 
 
