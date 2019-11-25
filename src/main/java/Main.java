@@ -3,9 +3,8 @@ import Server.StartListening;
 public class Main {
 
     public static void main(String[] args) {
-
+        
         Runnable StartListening = new StartListening();
-
         new Thread(StartListening).start();
     }
 

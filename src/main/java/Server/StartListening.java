@@ -23,9 +23,10 @@ public class StartListening implements Runnable {
                 //Venter på en client
                 Socket client = welcomeSocket.accept();
                 System.out.println("Client connected");
+
                 //Når en client kobler på serveren oprettes der en ny tråd og serveren går tilbage og venter på nye klienter
-                Runnable CommunikateClient = new CommunicateClient(client);
-                new Thread(CommunikateClient).start();
+                Runnable InFromClient = new CommunicateClient(client);
+                new Thread(InFromClient).start();
 
 
             }

@@ -23,96 +23,95 @@ public class CommunicateClient implements Runnable {
             InputStream inFromClient = client.getInputStream();
 
             //Laver et json objekt der kan sendes over stream
-            JSONObject testingJson = new JSONObject();
+            JSONObject jsonObject = new JSONObject();
+
+            //JSONparser kan oversætte JSON fra streamen til java
+            JSONParser parser = new JSONParser();
 
             //Laver en buffer der kan omskrive json til data stream
-            BufferedReader r = new BufferedReader(new InputStreamReader(inFromClient, "US-ASCII"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromClient, "US-ASCII"));
+
+            //Serveren laver et objekt der kan snakke med webservicen
+            CallingWebservice database = new CallingWebservice();
+
+            byte[] b = new byte[1024];
+            String message;
 
 
 
             while (true) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
-                String clientWant = r.readLine();
-                System.out.println("Got something from client");
-
-                //JSONparser kan oversætte JSON fra streamen til java
-                JSONParser parser = new JSONParser();
-
+                String clientWant = reader.readLine();
                 //Laver et JSON objekt ud fra streamen
                 JSONObject jsonVersion = (JSONObject) parser.parse(clientWant);
+
                 //Objektet er et hashmap. En af KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
-                //Printer værdien ud
-                System.out.println(jsonString);
 
-                //Værdien kommer fra knapperne. Server checker hvilken funktion den skal bruge her
-                if (jsonString.equals("Chat")){
+                switch(jsonString)
+                {
+                    case "Chat":
 
-                    //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
-                    String WhatClientWrote = (String) jsonVersion.get("Chat");
-                    //indtil videre laver den et echo
-                    testingJson.put("function", "chat");
-                    testingJson.put("name", WhatClientWrote);
-                    //JSON objektet bliver lavet om til en string og derefter en byte array
-                    String message = testingJson.toJSONString();
-                    byte[] b = message.getBytes();
-                    //Byte arrayen bliver sendt til klienten
-                    outToClient.write(b);
+                        //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
+                        String WhatClientWrote = (String) jsonVersion.get("Chat");
+                        //indtil videre laver den et echo
+                        jsonObject.put("function", "chat");
+                        jsonObject.put("name", WhatClientWrote);
+                        //JSON objektet bliver lavet om til en string og derefter en byte array
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
+                        //Byte arrayen bliver sendt til klienten
+                        outToClient.write(b);
+                        break;
 
-                   // CommunikateWithClient.CommunicateToAll all = new CommunikateWithClient.CommunicateToAll();
-                   // all.talkToAll(message);
+                    case "Add friend":
+                        //bruger metode fra webservice
+                        String venner = database.friendRequest();
+
+                        //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                        jsonObject.put("name", venner);
+
+                        //JSON bliver lavet om til en string og der efter en byte array
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
+
+                        //Byte arrayen bliver sendt til klienten
+                        outToClient.write(b);
+                        break;
+
+                    case "Accepted":
+                        //Den gemmer brugernavnene i en array
+                        database.addFriend();
+                        break;
+
+                    case "Delete friend":
+                        //Den gemmer brugernavnene i en array
+                        database.deleteFriend();
+                        break;
+                    case "GetFriends":
+                        System.out.println("getting friends");
+                        //Den gemmer brugernavnene i en array
+                        ArrayList<String> alleVenner = database.getAllFriends();
+
+                        //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                        jsonObject.put("function", "alleVenner");
+                        jsonObject.put("data", alleVenner);
+
+                        //JSON bliver lavet om til en string og der efter en byte array
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
+
+                        //Byte arrayen bliver sendt til klienten
+                        outToClient.write(b);
+
+                        break;
+                /* tom case
+                 case "keyword":
+
+                        break;*/
+                    default:
+                        System.out.println("no match");
                 }
-
-                if (jsonString.equals("Add friend")) {
-
-                    //Serveren laver et objekt der kan snakke med webservicen
-                    CallingWebservice database = new CallingWebservice();
-
-                    //bruger metode fra webservice
-                    String venner = database.friendRequest();
-
-                    //Listen bliver gemt i et JSONobejktet under KEY'en Data
-                    testingJson.put("name", venner);
-
-                    //JSON bliver lavet om til en string og der efter en byte array
-                    String message = testingJson.toJSONString();
-                    byte[] b = message.getBytes();
-
-                    //Byte arrayen bliver sendt til klienten
-                    outToClient.write(b);
-
-                }
-                if (jsonString.equals("Accepted")) {
-                    CallingWebservice database = new CallingWebservice();
-
-                    //Den gemmer brugernavnene i en array
-                    database.addFriend();
-                }
-                if (jsonString.equals("Delete friend")) {
-                    //Hvis klienten vil hente sin venne liste, laver serveren et objekt der kan snakke med webservicen
-                    CallingWebservice database = new CallingWebservice();
-                    //Den gemmer brugernavnene i en array
-                    database.deleteFriend();
-
-                }
-                /*else {
-                    //Hvis klienten vil hente sin venne liste, laver serveren et objekt der kan snakke med webservicen
-                    CallingWebservice database = new CallingWebservice();
-
-                    //Den gemmer brugernavnene i en array
-                    ArrayList<String> venner = database.getAllFriends();
-
-                    //Listen bliver gemt i et JSONobejktet under KEY'en Data
-                    testingJson.put("data", venner);
-
-                    //JSON bliver lavet om til en string og der efter en byte array
-                    String message = testingJson.toJSONString();
-                    byte[] b = message.getBytes();
-
-                    //Byte arrayen bliver sendt til klienten
-                    outToClient.write(b);
-                }*/
-                
             }
 
         } catch (Exception e){
