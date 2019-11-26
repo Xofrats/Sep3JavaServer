@@ -48,6 +48,8 @@ public class CommunicateClient implements Runnable {
                 //Objektet er et hashmap. En af KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
 
+                String jsonUsername = (String) jsonVersion.get("Username");
+
                 switch(jsonString)
                 {
                     case "Chat":
@@ -65,45 +67,37 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Add friend":
+
                         //bruger metode fra webservice
-                        String venner = database.friendRequest();
+                        String venner = database.friendRequest(jsonUsername);
 
                         //Listen bliver gemt i et JSONobejktet under KEY'en Data
                         jsonObject.put("name", venner);
-
-                        //JSON bliver lavet om til en string og der efter en byte array
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
                         break;
 
                     case "Accepted":
+
                         //Den gemmer brugernavnene i en array
-                        database.addFriend();
+                        database.addFriend("TEST", jsonUsername);
                         break;
 
                     case "Delete friend":
                         //Den gemmer brugernavnene i en array
-                        database.deleteFriend();
+                        database.deleteFriend("TEST",jsonUsername);
                         break;
                     case "GetFriends":
-                        System.out.println("getting friends");
+
                         //Den gemmer brugernavnene i en array
-                        ArrayList<String> alleVenner = database.getAllFriends();
+                        ArrayList<String> getfriends = database.getAllFriends("TEST");
 
                         //Listen bliver gemt i et JSONobejktet under KEY'en Data
-                        jsonObject.put("function", "alleVenner");
-                        jsonObject.put("data", alleVenner);
-
-                        //JSON bliver lavet om til en string og der efter en byte array
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
+                        jsonObject.put("data", getfriends);
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
-
                         break;
                 /* tom case
                  case "keyword":

@@ -8,6 +8,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 
 public class CallingWebservice {
@@ -21,33 +22,33 @@ public class CallingWebservice {
         target = client.target("http://localhost:8080/WebServices");
     }
 
-    public ArrayList<String> getAllFriends() {
+    public ArrayList<String> getAllFriends(String owner) {
         GenericType<ArrayList<Friend>> userArrayListType = new GenericType<ArrayList<Friend>>() {
         };
 
-        ArrayList<Friend> allUsers = target.path("friends").request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
+        ArrayList<Friend> allUsers = target.path("friends").path(owner).request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
 
         ArrayList<String> allNames = new ArrayList<>();
         for (Friend friendList : allUsers) {
-            System.out.println(friendList.toString());
             allNames.add(friendList.getUsername());
         }
         return allNames;
     }
 
-    public String friendRequest() {
-        //Får et objekt men skal bruge en string
-        return target.path("friends").path("AddFriend").request().accept(MediaType.APPLICATION_JSON).toString();
+    public String friendRequest(String username) {
+        // Går ind i web service bruger en GET metode
+        //
+        return target.path("friends").path("friendRequest").path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
     }
 
-    public void addFriend() {
-        //Hvordan får jeg owner i den 2. path
-        Friend friend = new Friend();
-        target.path("friends").path("").request(MediaType.APPLICATION_JSON).post(Entity.json(friend));
+    public void addFriend(String owner, String username) {
+        // Går ind i web service og bruger POST metoden
+        // En ven bliver tilføjet med det username som er modtaget af owner
+        target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username));
     }
 
-    public void deleteFriend() {
-        //Hvordan får jeg username fra klienten
-        target.path("users").path("username").request().delete();
+    public void deleteFriend(String owner, String username) {
+        //
+        target.path("friends").path(owner).path(username).request().delete();
     }
 }
