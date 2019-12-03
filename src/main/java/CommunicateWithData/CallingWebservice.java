@@ -75,13 +75,9 @@ public class CallingWebservice {
         return user;
     }
 
-    public  String createUser(String username, String password){
-
-        String request = "username=" + username+ "&password=" + password;
-
-
-
-        return target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(request)).toString();
+    public  void createUser(String username, String password){
+        target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(password)).toString();
+        target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).toString();
     }
 
 

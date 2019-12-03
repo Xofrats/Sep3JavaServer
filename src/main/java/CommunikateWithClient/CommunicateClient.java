@@ -52,7 +52,7 @@ public class CommunicateClient implements Runnable {
                 String jsonString = (String) jsonVersion.get("Function");
                 String jsonUsername = (String) jsonVersion.get("Username");
                 String jsonPassword = (String) jsonVersion.get("Password");
-                ArrayList<String> request = database.getfriendRequest("TEST");
+                ArrayList<String> request = new ArrayList<>();
 
                 switch(jsonString)
                 {
@@ -161,7 +161,9 @@ public class CommunicateClient implements Runnable {
                         case "Create user":
 
                         //bruger metode fra webservice
-                        String create = database.createUser(jsonUsername, jsonPassword);
+                        database.createUser(jsonUsername, jsonPassword);
+
+
                         break;
 
                         default:
