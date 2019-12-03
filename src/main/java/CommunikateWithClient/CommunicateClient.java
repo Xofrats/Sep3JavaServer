@@ -48,6 +48,7 @@ public class CommunicateClient implements Runnable {
                 //Objektet er et hashmap. En af KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
                 String jsonUsername = (String) jsonVersion.get("Username");
+                String jsonPassword = (String) jsonVersion.get("Password");
                 ArrayList<String> request = database.getfriendRequest("TEST");
 
                 switch(jsonString)
@@ -133,18 +134,23 @@ public class CommunicateClient implements Runnable {
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
                         break;
-                /* tom case
-                 case "keyword":
 
-                        break;*/
-                    default:
+                        case "Create user":
+
+                        //bruger metode fra webservice
+                        String create = database.createUser(jsonUsername, jsonPassword);
+                        break;
+
+                        default:
                         System.out.println("no match");
-                }
-            }
+                        }
 
-        } catch (Exception e){
+                        }
+        }catch (Exception e){
             e.printStackTrace();
             System.out.println("Client disconnected");
+
+        }
         }
     }
-}
+

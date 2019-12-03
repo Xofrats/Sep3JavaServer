@@ -8,7 +8,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 
 public class CallingWebservice {
@@ -67,4 +66,15 @@ public class CallingWebservice {
         //
         return target.path("friends").path(owner).path(username).request().delete().toString();
     }
+
+    public  String createUser(String username, String password){
+
+        String request = "username=" + username+ "&password=" + password;
+
+
+
+        return target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(request)).toString();
+    }
+
+
 }
