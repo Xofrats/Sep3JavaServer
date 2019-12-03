@@ -76,7 +76,9 @@ public class CallingWebservice {
     }
 
     public  void createUser(String username, String password){
+        System.out.println("Gik i create user");
         target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(password)).toString();
+        System.out.println("createuser step 2");
         target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).toString();
     }
 

@@ -9,7 +9,7 @@ public class Main {
         new Thread(StartListening).start();
 
         CallingWebservice callingWebservice = new CallingWebservice();
-        System.out.println(callingWebservice.getUser("Sitch"));
+
     }
 
 }
