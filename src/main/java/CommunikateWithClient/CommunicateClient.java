@@ -1,6 +1,7 @@
 package CommunikateWithClient;
 
 import CommunicateWithData.CallingWebservice;
+import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 
 public class CommunicateClient implements Runnable {
     private Socket client;
+    private String owner;
+    private allClients clients = allClients.getallClientsInstance();
 
     public CommunicateClient(Socket client) {
         this.client = client;
@@ -57,14 +60,14 @@ public class CommunicateClient implements Runnable {
 
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String WhatClientWrote = (String) jsonVersion.get("Chat");
-                        //indtil videre laver den et echo
+                        //laver json der skal sendes til den anden klient
                         jsonObject.put("function", "chat");
-                        jsonObject.put("name", WhatClientWrote);
-                        //JSON objektet bliver lavet om til en string og derefter en byte array
+                        jsonObject.put("data", WhatClientWrote);
+                        jsonObject.put("username", owner);
+
+                        //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
-                        b = message.getBytes();
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                       clients.writeToClient((String) jsonVersion.get("Username"), message);
                         break;
 
                     case "Add friend":
@@ -133,6 +136,26 @@ public class CommunicateClient implements Runnable {
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
+                        break;
+
+                    case "Login":
+                        AdministrateUser administrateUser = new AdministrateUser();
+                        //checker om brugeren og kodeord er i databasen
+                        if (administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password"))) {
+
+                            //laver et jsonobjekt til klienten
+                            jsonObject.put("function", "Login");
+                            jsonObject.put("data", "Valid");
+                            //Gemmer socket med tilhørende brugernavn
+                            clients.addClient(jsonUsername, client);
+                            //sætter trådens navn til den der loggede ind
+                            owner = jsonUsername;
+                            //Sender json til klienten
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+                            outToClient.write(b);
+                        }
+
                         break;
 
                         case "Create user":

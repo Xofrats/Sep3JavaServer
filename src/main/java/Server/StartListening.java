@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class StartListening implements Runnable {
+    AdministrateUser administrateUser = new AdministrateUser();
 
 
 
@@ -23,6 +24,7 @@ public class StartListening implements Runnable {
                 //Venter på en client
                 Socket client = welcomeSocket.accept();
                 System.out.println("Client connected");
+
 
                 //Når en client kobler på serveren oprettes der en ny tråd og serveren går tilbage og venter på nye klienter
                 Runnable InFromClient = new CommunicateClient(client);
