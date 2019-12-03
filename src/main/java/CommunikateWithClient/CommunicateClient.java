@@ -48,11 +48,13 @@ public class CommunicateClient implements Runnable {
                 //Laver et JSON objekt ud fra streamen
                 JSONObject jsonVersion = (JSONObject) parser.parse(clientWant);
 
-                //Objektet er et hashmap. En af KEY er function. Værdien der tilhører function bliver gemt i en string
+                //Objektet er et hashmap. En KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
                 String jsonUsername = (String) jsonVersion.get("Username");
                 String jsonPassword = (String) jsonVersion.get("Password");
                 ArrayList<String> request = database.getfriendRequest("TEST");
+
+
 
                 switch(jsonString)
                 {
@@ -73,29 +75,55 @@ public class CommunicateClient implements Runnable {
                     case "Add friend":
 
                         //bruger metode fra webservice
-                        String check = database.checkUser("TEST", jsonUsername);
+                        String check = database.checkUser("Mette", jsonUsername);
 
                         if (check.equals("Valid")) {
-                            database.friendRequest("TEST", jsonUsername);
-                        }
-                        break;
+                            String getRequest = database.friendRequest("Mette", jsonUsername);
 
-                    case "All request":
-
-                            jsonObject.put("AllRequest", request);
-                            jsonObject.put("function", "allFriendList");
+                            jsonObject.put("SendFriendRequest", getRequest);
+                            jsonObject.put("function", "MyFriendRequest");
 
                             message = jsonObject.toJSONString();
                             b = message.getBytes();
 
                             //Byte arrayen bliver sendt til klienten
                             outToClient.write(b);
+                        }
                         break;
 
                     case "friend request":
 
-                        for (String one : request) {
-                            jsonObject.put("FriendRequest", one);
+                        // Starter med at hente alle friend request
+                        System.out.println(request);
+                        jsonObject.put("FriendRequest", request);
+                        jsonObject.put("function", "friendList");
+
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
+
+                        //Byte arrayen bliver sendt til klienten
+                        outToClient.write(b);
+                        break;
+
+                    case "Accepted":
+
+                        // Den bruger man har accepteret bliver registreret som ven
+                        String friend = database.addFriend("TEST", jsonUsername);
+
+                        // Hvis brugeren er registreret som ven, får man besked
+                        if (friend.equals("Friend added")) {
+                            //Listen bliver gemt i et JSONobejktet under KEY'en accepted
+                            jsonObject.put("accepted", friend);
+
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+
+                            //Byte arrayen bliver sendt til klienten
+                            outToClient.write(b);
+
+
+                            // Når brugeren acceptere en venneanmodning bliver der hentet en ny liste med venneanmodninger
+                            jsonObject.put("FriendRequest", request);
                             jsonObject.put("function", "friendList");
 
                             message = jsonObject.toJSONString();
@@ -104,21 +132,6 @@ public class CommunicateClient implements Runnable {
                             //Byte arrayen bliver sendt til klienten
                             outToClient.write(b);
                         }
-                        break;
-
-                    case "Accepted":
-
-                        //Den gemmer brugernavnene i en array
-                        String friend = database.addFriend("TEST", jsonUsername);
-
-                        //Listen bliver gemt i et JSONobejktet under KEY'en Data
-                        jsonObject.put("accepted", friend);
-
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
-
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
                         break;
 
                     case "Delete friend":

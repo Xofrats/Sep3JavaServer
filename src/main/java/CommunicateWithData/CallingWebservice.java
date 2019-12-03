@@ -46,16 +46,16 @@ public class CallingWebservice {
     }
 
     public ArrayList<String> getfriendRequest(String owner) {
-        GenericType<ArrayList<Friend>> userArrayListType = new GenericType<ArrayList<Friend>>() {
+        GenericType<ArrayList<Friend>> friendRequest = new GenericType<ArrayList<Friend>>() {
         };
 
-        ArrayList<Friend> allUsers = target.path("friends").path("getFriendRequest").path(owner).request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
+        ArrayList<Friend> allFriends = target.path("friends").path("getFriendRequest").path(owner).request().accept(MediaType.APPLICATION_JSON).get(friendRequest);
 
-        ArrayList<String> allNames = new ArrayList<>();
-        for (Friend friendList : allUsers) {
-            allNames.add(friendList.getUsername());
+        ArrayList<String> allRequestNames = new ArrayList<>();
+        for (Friend friendList : allFriends) {
+            allRequestNames.add(friendList.getUsername());
         }
-        return allNames;
+        return allRequestNames;
     }
 
     public String addFriend(String owner, String username) {
