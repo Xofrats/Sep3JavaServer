@@ -51,4 +51,11 @@ public class CallingWebservice {
         //
         target.path("friends").path(owner).path(username).request().delete();
     }
+
+    public User getUser(String username) {
+
+        User user = target.path("users").path(username).request().accept(MediaType.APPLICATION_JSON).get(User.class);
+
+        return user;
+    }
 }

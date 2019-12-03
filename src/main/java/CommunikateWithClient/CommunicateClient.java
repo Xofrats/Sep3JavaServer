@@ -1,6 +1,9 @@
 package CommunikateWithClient;
 
 import CommunicateWithData.CallingWebservice;
+import CommunicateWithData.User;
+import Server.AdministrateUser;
+import Server.allClients;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -10,6 +13,8 @@ import java.util.ArrayList;
 
 public class CommunicateClient implements Runnable {
     private Socket client;
+    private String owner;
+    private allClients clients = allClients.getallClientsInstance();
 
     public CommunicateClient(Socket client) {
         this.client = client;
@@ -48,6 +53,8 @@ public class CommunicateClient implements Runnable {
                 //Objektet er et hashmap. En af KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
 
+                System.out.println("Function is: " + jsonString);
+
                 String jsonUsername = (String) jsonVersion.get("Username");
 
                 switch(jsonString)
@@ -56,14 +63,15 @@ public class CommunicateClient implements Runnable {
 
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String WhatClientWrote = (String) jsonVersion.get("Chat");
+                        String whoToSendTo = (String) jsonVersion.get("Username");
                         //indtil videre laver den et echo
                         jsonObject.put("function", "chat");
-                        jsonObject.put("name", WhatClientWrote);
+                        jsonObject.put("data", WhatClientWrote);
+                        jsonObject.put("username", owner);
+
                         //JSON objektet bliver lavet om til en string og derefter en byte array
                         message = jsonObject.toJSONString();
-                        b = message.getBytes();
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                       clients.writeToClient(whoToSendTo, message);
                         break;
 
                     case "Add friend":
@@ -72,6 +80,7 @@ public class CommunicateClient implements Runnable {
                         String venner = database.friendRequest(jsonUsername);
 
                         //Listen bliver gemt i et JSONobejktet under KEY'en Data
+
                         jsonObject.put("name", venner);
 
                         //Byte arrayen bliver sendt til klienten
@@ -94,10 +103,37 @@ public class CommunicateClient implements Runnable {
                         ArrayList<String> getfriends = database.getAllFriends("TEST");
 
                         //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                        jsonObject.put("function", "alleVenner");
                         jsonObject.put("data", getfriends);
+
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
+                        break;
+
+                    case "Login":
+                        AdministrateUser administrateUser = new AdministrateUser();
+                        System.out.println("Username: " + jsonUsername);
+                        System.out.println("password: " + jsonVersion.get("Password"));
+                        System.out.println(administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password")));
+                        if (administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password"))) {
+                            System.out.println("valid user");
+                            //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                            jsonObject.put("function", "Login");
+                            jsonObject.put("data", "Valid");
+
+                            clients.addClient(jsonUsername, client);
+                            owner = jsonUsername;
+
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+
+                            //Byte arrayen bliver sendt til klienten
+                            outToClient.write(b);
+                        }
+
                         break;
                 /* tom case
                  case "keyword":
