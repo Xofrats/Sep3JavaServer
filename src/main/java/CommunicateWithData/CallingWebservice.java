@@ -35,21 +35,37 @@ public class CallingWebservice {
         return allNames;
     }
 
-    public String friendRequest(String username) {
-        // Går ind i web service bruger en GET metode
-        //
-        return target.path("friends").path("friendRequest").path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+    public String checkUser(String owner, String username) {
+        // Går ind i web service og ser om det indtastede username findes i databasen
+        return target.path("friends").path("checkUser").path(owner).path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
     }
 
-    public void addFriend(String owner, String username) {
-        // Går ind i web service og bruger POST metoden
+    public String friendRequest(String owner, String username) {
+        // Går ind i web service og sender en venneanmodning
+        return target.path("friends").path("friendRequest").path(owner).path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+    }
+
+    public ArrayList<String> getfriendRequest(String owner) {
+        GenericType<ArrayList<Friend>> userArrayListType = new GenericType<ArrayList<Friend>>() {
+        };
+
+        ArrayList<Friend> allUsers = target.path("friends").path("getFriendRequest").path(owner).request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
+
+        ArrayList<String> allNames = new ArrayList<>();
+        for (Friend friendList : allUsers) {
+            allNames.add(friendList.getUsername());
+        }
+        return allNames;
+    }
+
+    public String addFriend(String owner, String username) {
         // En ven bliver tilføjet med det username som er modtaget af owner
-        target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username));
+        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).toString();
     }
 
-    public void deleteFriend(String owner, String username) {
+    public String deleteFriend(String owner, String username) {
         //
-        target.path("friends").path(owner).path(username).request().delete();
+        return target.path("friends").path(owner).path(username).request().delete().toString();
     }
 
     public User getUser(String username) {
