@@ -1,4 +1,4 @@
-package Server;
+package CommunikateWithClient;
 
 import java.io.IOException;
 import java.net.Socket;

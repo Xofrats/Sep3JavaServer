@@ -1,9 +1,7 @@
 package CommunikateWithClient;
 
 import CommunicateWithData.CallingWebservice;
-import CommunicateWithData.User;
 import Server.AdministrateUser;
-import Server.allClients;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -61,15 +59,14 @@ public class CommunicateClient implements Runnable {
 
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String WhatClientWrote = (String) jsonVersion.get("Chat");
-                        String whoToSendTo = (String) jsonVersion.get("Username");
-                        //indtil videre laver den et echo
+                        //laver json der skal sendes til den anden klient
                         jsonObject.put("function", "chat");
                         jsonObject.put("data", WhatClientWrote);
                         jsonObject.put("username", owner);
 
-                        //JSON objektet bliver lavet om til en string og derefter en byte array
+                        //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
-                       clients.writeToClient(whoToSendTo, message);
+                       clients.writeToClient((String) jsonVersion.get("Username"), message);
                         break;
 
                     case "Add friend":
@@ -141,22 +138,19 @@ public class CommunicateClient implements Runnable {
 
                     case "Login":
                         AdministrateUser administrateUser = new AdministrateUser();
-                        System.out.println("Username: " + jsonUsername);
-                        System.out.println("password: " + jsonVersion.get("Password"));
-                        System.out.println(administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password")));
+                        //checker om brugeren og kodeord er i databasen
                         if (administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password"))) {
-                            System.out.println("valid user");
-                            //Listen bliver gemt i et JSONobejktet under KEY'en Data
+
+                            //laver et jsonobjekt til klienten
                             jsonObject.put("function", "Login");
                             jsonObject.put("data", "Valid");
-
+                            //Gemmer socket med tilhørende brugernavn
                             clients.addClient(jsonUsername, client);
+                            //sætter trådens navn til den der loggede ind
                             owner = jsonUsername;
-
+                            //Sender json til klienten
                             message = jsonObject.toJSONString();
                             b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
                             outToClient.write(b);
                         }
 
