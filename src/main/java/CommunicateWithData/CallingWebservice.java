@@ -60,7 +60,12 @@ public class CallingWebservice {
 
     public String addFriend(String owner, String username) {
         // En ven bliver tilføjet med det username som er modtaget af owner
-        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).toString();
+        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).readEntity(String.class);
+    }
+
+    public String rejectUser(String owner, String username) {
+        //
+        return target.path("friends").path("rejectUser").path(owner).path(username).request().delete().readEntity(String.class);
     }
 
     public String deleteFriend(String owner, String username) {

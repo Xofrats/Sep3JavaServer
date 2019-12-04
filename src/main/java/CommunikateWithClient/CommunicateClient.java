@@ -4,6 +4,7 @@ import CommunicateWithData.CallingWebservice;
 import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.Socket;
@@ -41,7 +42,6 @@ public class CommunicateClient implements Runnable {
             String message;
 
 
-
             while (true) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
                 String clientWant = reader.readLine();
@@ -54,9 +54,7 @@ public class CommunicateClient implements Runnable {
                 String jsonPassword = (String) jsonVersion.get("Password");
 
 
-
-                switch(jsonString)
-                {
+                switch (jsonString) {
                     case "Chat":
 
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
@@ -68,7 +66,7 @@ public class CommunicateClient implements Runnable {
 
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
-                       clients.writeToClient((String) jsonVersion.get("Username"), message);
+                        clients.writeToClient((String) jsonVersion.get("Username"), message);
                         break;
 
                     case "Add friend":
@@ -87,6 +85,7 @@ public class CommunicateClient implements Runnable {
 
                             //Byte arrayen bliver sendt til klienten
                             outToClient.write(b);
+                        }
                         break;
 
                     case "friend request":
@@ -129,7 +128,7 @@ public class CommunicateClient implements Runnable {
 
                     case "Rejected":
                         //Den gemmer brugernavnene i en array
-                        String reject = database.rejectUser("TEST",jsonUsername);
+                        String reject = database.rejectUser("TEST", jsonUsername);
 
                         System.out.println(reject);
 
@@ -145,7 +144,7 @@ public class CommunicateClient implements Runnable {
 
                     case "Delete friend":
                         //Den gemmer brugernavnene i en array
-                        database.deleteFriend("TEST",jsonUsername);
+                        database.deleteFriend("TEST", jsonUsername);
                         break;
 
                     case "GetFriends":
@@ -171,7 +170,7 @@ public class CommunicateClient implements Runnable {
                         System.out.println("Logging in");
                         AdministrateUser administrateUser = new AdministrateUser();
                         //checker om brugeren og kodeord er i databasen
-                        if (administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password"))) {
+                        if (administrateUser.logIn(jsonUsername, (String) jsonVersion.get("Password"))) {
 
                             //laver et jsonobjekt til klienten
                             jsonObject.put("function", "Login");
@@ -188,23 +187,28 @@ public class CommunicateClient implements Runnable {
 
                         break;
 
-                        case "Create user":
+                    case "Create user":
 
                         //bruger metode fra webservice
                         //String create = database.createUser(jsonUsername, jsonPassword);
                         break;
 
-                        default:
-                            System.out.println(jsonString);
+                    default:
+                        System.out.println(jsonString);
                         System.out.println("no match");
-                        }
-
-                        }
-        }catch (Exception e){
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Client disconnected");
 
-        }
-        }
+        } /*catch (ParseException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
+}
 
