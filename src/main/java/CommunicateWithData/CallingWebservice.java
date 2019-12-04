@@ -46,34 +46,26 @@ public class CallingWebservice {
     }
 
     public ArrayList<String> getfriendRequest(String owner) {
-        GenericType<ArrayList<Friend>> friendRequest = new GenericType<ArrayList<Friend>>() {
+        GenericType<ArrayList<Friend>> userArrayListType = new GenericType<ArrayList<Friend>>() {
         };
 
-        ArrayList<Friend> allFriends = target.path("friends").path("getFriendRequest").path(owner).request().accept(MediaType.APPLICATION_JSON).get(friendRequest);
+        ArrayList<Friend> allUsers = target.path("friends").path("getFriendRequest").path(owner).request().accept(MediaType.APPLICATION_JSON).get(userArrayListType);
 
-        ArrayList<String> allRequestNames = new ArrayList<>();
-        for (Friend friendList : allFriends) {
-            allRequestNames.add(friendList.getUsername());
+        ArrayList<String> allNames = new ArrayList<>();
+        for (Friend friendList : allUsers) {
+            allNames.add(friendList.getUsername());
         }
-        return allRequestNames;
+        return allNames;
     }
 
     public String addFriend(String owner, String username) {
-
-        System.out.println("Inde i callingWebservice");
         // En ven bliver tilføjet med det username som er modtaget af owner
-        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).readEntity(String.class);
-    }
-
-    public String rejectUser(String owner, String username) {
-        //
-        System.out.println("Inde i CW");
-        return target.path("friends").path("rejectUser").path(owner).path(username).request().delete().readEntity(String.class);
+        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).toString();
     }
 
     public String deleteFriend(String owner, String username) {
         //
-        return target.path("friends").path(owner).path(username).request().delete().readEntity(String.class);
+        return target.path("friends").path(owner).path(username).request().delete().toString();
     }
 
     public User getUser(String username) {

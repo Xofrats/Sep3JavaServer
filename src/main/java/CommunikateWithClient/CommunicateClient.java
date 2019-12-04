@@ -87,7 +87,6 @@ public class CommunicateClient implements Runnable {
 
                             //Byte arrayen bliver sendt til klienten
                             outToClient.write(b);
-                        }
                         break;
 
                     case "friend request":
@@ -150,18 +149,26 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "GetFriends":
+                        System.out.println("Getting friends for " + owner);
 
                         //Den gemmer brugernavnene i en array
-                        ArrayList<String> getfriends = database.getAllFriends("TEST");
+                        ArrayList<String> getfriends = database.getAllFriends(owner);
+
+                        System.out.println("friends: " + getfriends);
 
                         //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                        jsonObject.put("function", "alleVenner");
                         jsonObject.put("data", getfriends);
+
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
                         break;
 
                     case "Login":
+                        System.out.println("Logging in");
                         AdministrateUser administrateUser = new AdministrateUser();
                         //checker om brugeren og kodeord er i databasen
                         if (administrateUser.logIn(jsonUsername, (String)jsonVersion.get("Password"))) {
@@ -188,6 +195,7 @@ public class CommunicateClient implements Runnable {
                         break;
 
                         default:
+                            System.out.println(jsonString);
                         System.out.println("no match");
                         }
 
