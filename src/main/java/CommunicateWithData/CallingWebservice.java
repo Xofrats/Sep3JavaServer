@@ -59,13 +59,21 @@ public class CallingWebservice {
     }
 
     public String addFriend(String owner, String username) {
+
+        System.out.println("Inde i callingWebservice");
         // En ven bliver tilføjet med det username som er modtaget af owner
-        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).toString();
+        return target.path("friends").path(owner).request(MediaType.APPLICATION_JSON).post(Entity.json(username)).readEntity(String.class);
+    }
+
+    public String rejectUser(String owner, String username) {
+        //
+        System.out.println("Inde i CW");
+        return target.path("friends").path("rejectUser").path(owner).path(username).request().delete().readEntity(String.class);
     }
 
     public String deleteFriend(String owner, String username) {
         //
-        return target.path("friends").path(owner).path(username).request().delete().toString();
+        return target.path("friends").path(owner).path(username).request().delete().readEntity(String.class);
     }
 
     public User getUser(String username) {
@@ -75,14 +83,13 @@ public class CallingWebservice {
         return user;
     }
 
-    public  String createUser(String username, String password){
+    /*public String createUser(String username, String password) {
 
-        String request = "username=" + username+ "&password=" + password;
-
+        String request = "username=" + username + "&password=" + password;
 
 
         return target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(request)).toString();
-    }
+    }*/
 
 
 }

@@ -7,10 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class StartListening implements Runnable {
-    AdministrateUser administrateUser = new AdministrateUser();
-
-
-
 
     public void run() {
         try {
@@ -34,7 +30,7 @@ public class StartListening implements Runnable {
             }
         } catch (Exception e){
             System.out.println("Start listening Error");
-            System.out.println(e.getStackTrace());
+            e.printStackTrace();
         }
     }
 }
