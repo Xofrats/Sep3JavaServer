@@ -1,6 +1,8 @@
 package CommunikateWithClient;
 
 import CommunicateWithData.CallingWebservice;
+import CommunicateWithData.Chat;
+import CommunicateWithData.ChatLog;
 import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,6 +44,7 @@ public class CommunicateClient implements Runnable {
             String message;
 
 
+
             while (true) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
                 String clientWant = reader.readLine();
@@ -51,6 +54,7 @@ public class CommunicateClient implements Runnable {
                 //Objektet er et hashmap. En KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
                 String jsonUsername = (String) jsonVersion.get("Username");
+
                 String jsonPassword = (String) jsonVersion.get("Password");
 
 
@@ -90,10 +94,10 @@ public class CommunicateClient implements Runnable {
 
                     case "friend request":
 
-                        ArrayList<String> request = database.getfriendRequest("TEST");
+                        ArrayList<String> friendRequests = database.getfriendRequest("TEST");
 
                         // Starter med at hente alle friend request
-                        jsonObject.put("FriendRequest", request);
+                        jsonObject.put("FriendRequest", friendRequests);
                         jsonObject.put("function", "friendList");
 
                         message = jsonObject.toJSONString();
@@ -164,6 +168,7 @@ public class CommunicateClient implements Runnable {
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
+
                         break;
 
                     case "Login":
@@ -191,6 +196,13 @@ public class CommunicateClient implements Runnable {
 
                         //bruger metode fra webservice
                         //String create = database.createUser(jsonUsername, jsonPassword);
+                        break;
+
+                    case "Get Chatlog":
+
+                        ArrayList<ChatLog> chatLogs = database.getChatLogs(1);
+                       System.out.println(chatLogs);
+
                         break;
 
                     default:
