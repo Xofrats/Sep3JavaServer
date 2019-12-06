@@ -11,14 +11,9 @@ public class Main {
 
         CallingWebservice data = new CallingWebservice();
 
-        System.out.println("Chat ID: " + data.getChatId(2,"morten", "Sitch"));
+        System.out.println("Chat ID: " + data.getAllFriends("morten"));
 
-        int chatId = Integer.valueOf(data.getChatId(2, "morten", "Sitch"));
 
-        for (ChatLog log:
-             data.getChatLogs(chatId)) {
-            System.out.println(log.toString());
-        }
     }
 
 }

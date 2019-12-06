@@ -51,4 +51,8 @@ public class ChatLog {
                 ", message='" + message + '\'' +
                 '}';
     }
+
+    public String getLog(){
+        return username + " wrote: " + message;
+    }
 }

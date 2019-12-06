@@ -20,6 +20,17 @@ public class CommunicateClient implements Runnable {
     public CommunicateClient(Socket client) {
         this.client = client;
     }
+    //Laver et json objekt der kan sendes over stream
+    JSONObject jsonObject = new JSONObject();
+
+    //JSONparser kan oversætte JSON fra streamen til java
+    JSONParser parser = new JSONParser();
+
+   //Serveren laver et objekt der kan snakke med webservicen
+    CallingWebservice database = new CallingWebservice();
+
+    byte[] b = new byte[1024];
+    String message;
 
     public void run() {
 
@@ -27,23 +38,8 @@ public class CommunicateClient implements Runnable {
             //henter clientens streams
             OutputStream outToClient = client.getOutputStream();
             InputStream inFromClient = client.getInputStream();
-
-            //Laver et json objekt der kan sendes over stream
-            JSONObject jsonObject = new JSONObject();
-
-            //JSONparser kan oversætte JSON fra streamen til java
-            JSONParser parser = new JSONParser();
-
             //Laver en buffer der kan omskrive json til data stream
             BufferedReader reader = new BufferedReader(new InputStreamReader(inFromClient, "US-ASCII"));
-
-            //Serveren laver et objekt der kan snakke med webservicen
-            CallingWebservice database = new CallingWebservice();
-
-            byte[] b = new byte[1024];
-            String message;
-
-
 
             while (true) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
@@ -67,6 +63,8 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("function", "chat");
                         jsonObject.put("data", WhatClientWrote);
                         jsonObject.put("username", owner);
+
+
 
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
@@ -199,9 +197,26 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Get Chatlog":
+                        Long jsonCount = (Long) jsonVersion.get("Count");
+                        int Count = jsonCount.intValue();
 
-                        ArrayList<ChatLog> chatLogs = database.getChatLogs(1);
-                       System.out.println(chatLogs);
+                        ArrayList<ChatLog> chatLogs = database.getChatLogs(getChatId(Count,owner,jsonUsername));
+
+                        ArrayList<String> logs = new ArrayList<>();
+
+                        for (ChatLog chatlog : chatLogs
+                             ) {
+                            logs.add(chatlog.getLog());
+                        }
+                        //laver et jsonobjekt til klienten
+                        jsonObject.put("function", "ChatLogs");
+                        jsonObject.put("Log", logs);
+                        jsonObject.put("Username", jsonUsername);
+                        System.out.println(jsonUsername);
+
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
+                        outToClient.write(b);
 
                         break;
 
@@ -221,6 +236,11 @@ public class CommunicateClient implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
+    }
+
+    public int getChatId(int count, String owner, String username){
+        return Integer.valueOf(database.getChatId(count, owner, username));
+
     }
 }
 
