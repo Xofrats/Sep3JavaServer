@@ -80,6 +80,40 @@ public class CallingWebservice {
         return user;
     }
 
+    public ArrayList<Chat> getAllChats() {
+        GenericType<ArrayList<Chat>> userArrayListType = new GenericType<ArrayList<Chat>>() {
+        };
+
+        ArrayList<Chat> allChats = target.path("chats").request().get(userArrayListType);
+        return allChats;
+    }
+
+    public String getChatId(int count, String owner, String username){
+        return target.path("chats").path(String.valueOf(count)).path(owner).path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+
+    }
+
+    public ArrayList<ChatLog> getChatLogs(int chatID) {
+        GenericType<ArrayList<ChatLog>> userArrayListType = new GenericType<ArrayList<ChatLog>>() {
+        };
+
+        ArrayList<ChatLog> allChatLogs = target.path("chats").path( String.valueOf(chatID)).request().get(userArrayListType);
+
+        return allChatLogs;
+    }
+
+    public String addChatLog(int chatID, String username, String message){
+        return target.path("chats").path(String.valueOf(chatID)).path(username).path(message).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+
+    }
+
+    /*public String createUser(String username, String password) {
+
+        String request = "username=" + username + "&password=" + password;
+
+
+        return target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(request)).toString();
+    }*/
     public String createUser(String owner, String username, User user) {
         return target.path("/users").path(owner).path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(user)).readEntity(String.class);
     }
