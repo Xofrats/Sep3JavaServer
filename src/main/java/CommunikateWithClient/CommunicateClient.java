@@ -64,8 +64,7 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("data", WhatClientWrote);
                         jsonObject.put("username", owner);
 
-
-
+                        database.addChatLog(getChatId(2, owner,jsonUsername), owner, WhatClientWrote);
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
                         clients.writeToClient((String) jsonVersion.get("Username"), message);

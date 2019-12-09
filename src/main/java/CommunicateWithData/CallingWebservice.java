@@ -102,6 +102,11 @@ public class CallingWebservice {
         return allChatLogs;
     }
 
+    public String addChatLog(int chatID, String username, String message){
+        return target.path("chats").path(String.valueOf(chatID)).path(username).path(message).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+
+    }
+
     /*public String createUser(String username, String password) {
 
         String request = "username=" + username + "&password=" + password;
