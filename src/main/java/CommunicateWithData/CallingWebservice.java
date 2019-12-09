@@ -70,7 +70,7 @@ public class CallingWebservice {
 
     public String deleteFriend(String owner, String username) {
         //
-        return target.path("friends").path(owner).path(username).request().delete().toString();
+        return target.path("friends").path("deleteUser").path(owner).path(username).request().delete().readEntity(String.class);
     }
 
     public User getUser(String username) {
@@ -80,13 +80,9 @@ public class CallingWebservice {
         return user;
     }
 
-    /*public String createUser(String username, String password) {
-
-        String request = "username=" + username + "&password=" + password;
-
-
-        return target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(request)).toString();
-    }*/
+    public String createUser(String owner, String username, User user) {
+        return target.path("/users").path(owner).path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(user)).readEntity(String.class);
+    }
 
 
 }
