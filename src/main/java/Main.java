@@ -15,4 +15,5 @@ public class Main {
 
         System.out.println("chatlog" + data.addChatLog(1, "morten", "Hello"));*/
     }
+
 }

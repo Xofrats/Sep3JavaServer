@@ -20,7 +20,6 @@ public class CommunicateClient implements Runnable {
     public CommunicateClient(Socket client) {
         this.client = client;
     }
-
     //Laver et json objekt der kan sendes over stream
     JSONObject jsonObject = new JSONObject();
 
@@ -237,10 +236,10 @@ public class CommunicateClient implements Runnable {
 
                         //Byte arrayen bliver sendt til klienten
                         outToClient.write(b);
+
                         break;
 
                     case "Login":
-
                         System.out.println("Logging in");
                         AdministrateUser administrateUser = new AdministrateUser();
                         //checker om brugeren og kodeord er i databasen
@@ -258,6 +257,7 @@ public class CommunicateClient implements Runnable {
                             b = message.getBytes();
                             outToClient.write(b);
                         }
+
                         break;
 
                     case "Create user":
@@ -277,7 +277,6 @@ public class CommunicateClient implements Runnable {
                         for (ChatLog chatlog : chatLogs) {
                             logs.add(chatlog.getLog());
                         }
-
                         //laver et jsonobjekt til klienten
                         jsonObject.put("function", "ChatLogs");
                         jsonObject.put("Log", logs);

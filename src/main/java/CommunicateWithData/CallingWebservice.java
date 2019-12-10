@@ -102,8 +102,9 @@ public class CallingWebservice {
         return allChatLogs;
     }
 
-    public String addChatLog(int chatID, String username, String message){
-        return target.path("chats").path(String.valueOf(chatID)).path(username).path(message).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+    public void addChatLog(int chatID, String username, String message){
+        ChatLog log = new ChatLog(chatID, username,message);
+        target.path("chats").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(log));
 
     }
 
