@@ -35,9 +35,9 @@ public class CallingWebservice {
         return allNames;
     }
 
-    public String checkUser(String owner, String username) {
+    public String checkUser(String username) {
         // Går ind i web service og ser om det indtastede username findes i databasen
-        return target.path("friends").path("checkUser").path(owner).path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
+        return target.path("friends").path("checkUser").path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
     }
 
     public String friendRequest(String owner, String username) {

@@ -20,13 +20,14 @@ public class CommunicateClient implements Runnable {
     public CommunicateClient(Socket client) {
         this.client = client;
     }
+
     //Laver et json objekt der kan sendes over stream
     JSONObject jsonObject = new JSONObject();
 
     //JSONparser kan oversætte JSON fra streamen til java
     JSONParser parser = new JSONParser();
 
-   //Serveren laver et objekt der kan snakke med webservicen
+    //Serveren laver et objekt der kan snakke med webservicen
     CallingWebservice database = new CallingWebservice();
 
     byte[] b = new byte[1024];
@@ -65,7 +66,7 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("data", WhatClientWrote);
                         jsonObject.put("username", owner);
 
-                        database.addChatLog(getChatId(2, owner,jsonUsername), owner, WhatClientWrote);
+                        database.addChatLog(getChatId(2, owner, jsonUsername), owner, WhatClientWrote);
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
                         clients.writeToClient((String) jsonVersion.get("Username"), message);
@@ -91,13 +92,25 @@ public class CommunicateClient implements Runnable {
 
                     case "Add friend":
 
-                        //bruger metode fra webservice
-                        String check = database.checkUser("Mette", jsonUsername);
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
+                            //bruger metode fra webservice
+                            String check = database.checkUser(jsonUsername);
 
-                        if (check.equals("Valid")) {
-                            String getRequest = database.friendRequest("Mette", jsonUsername);
 
-                            jsonObject.put("SendFriendRequest", getRequest);
+                            if (check.equals("Valid")) {
+                                String getRequest = database.friendRequest(owner, jsonUsername);
+
+                                jsonObject.put("SendFriendRequest", getRequest);
+                                jsonObject.put("function", "MyFriendRequest");
+
+                                message = jsonObject.toJSONString();
+                                b = message.getBytes();
+
+                                //Byte arrayen bliver sendt til klienten
+                                outToClient.write(b);
+                            }
+                        } else {
+                            jsonObject.put("SendFriendRequest", "Write an username");
                             jsonObject.put("function", "MyFriendRequest");
 
                             message = jsonObject.toJSONString();
@@ -125,17 +138,25 @@ public class CommunicateClient implements Runnable {
 
                     case "Accepted":
 
-                        System.out.println(jsonUsername);
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
+                            // Den bruger man har accepteret bliver registreret som ven
+                            String friend = database.addFriend(owner, jsonUsername);
 
-                        // Den bruger man har accepteret bliver registreret som ven
-                        String friend = database.addFriend(owner, jsonUsername);
+                            // Hvis brugeren er registreret som ven, får man besked
+                            if (friend.equals("Friend added")) {
+                                //Listen bliver gemt i et JSONobejktet under KEY'en accepted
+                                jsonObject.put("accepted", friend);
+                                jsonObject.put("function", "newFriend");
 
-                        System.out.println("friend er: " + friend);
+                                message = jsonObject.toJSONString();
+                                b = message.getBytes();
 
-                        // Hvis brugeren er registreret som ven, får man besked
-                        if (friend.equals("Friend added")) {
+                                //Byte arrayen bliver sendt til klienten
+                                outToClient.write(b);
+                            }
+                        } else {
                             //Listen bliver gemt i et JSONobejktet under KEY'en accepted
-                            jsonObject.put("accepted", friend);
+                            jsonObject.put("accepted", "The box is empty");
                             jsonObject.put("function", "newFriend");
 
                             message = jsonObject.toJSONString();
@@ -147,32 +168,56 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Rejected":
-                        //Den gemmer brugernavnene i en array
-                        String reject = database.rejectUser(owner, jsonUsername);
 
-                        jsonObject.put("RejectUser", reject);
-                        jsonObject.put("function", "UserRejected");
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
+                            //Den gemmer brugernavnene i en array
+                            String reject = database.rejectUser(owner, jsonUsername);
 
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
+                            jsonObject.put("RejectUser", reject);
+                            jsonObject.put("function", "UserRejected");
 
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+
+                            //Byte arrayen bliver sendt til klienten
+                            outToClient.write(b);
+                        } else {
+                            //Listen bliver gemt i et JSONobejktet under KEY'en accepted
+                            jsonObject.put("accepted", "The box is empty");
+                            jsonObject.put("function", "newFriend");
+
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+
+                            //Byte arrayen bliver sendt til klienten
+                            outToClient.write(b);
+                        }
                         break;
 
                     case "Delete friend":
-                        //Den gemmer brugernavnene i en array
-                        String delete = database.deleteFriend(owner, jsonUsername);
-                        System.out.println(delete);
 
-                        jsonObject.put("DeleteUser", delete);
-                        jsonObject.put("function", "UserDeleted");
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
+                            //Den gemmer brugernavnene i en array
+                            String delete = database.deleteFriend(owner, jsonUsername);
 
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
+                            jsonObject.put("DeleteUser", delete);
+                            jsonObject.put("function", "UserDeleted");
 
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+
+                            //Byte arrayen bliver sendt til klienten
+                            outToClient.write(b);
+                        } else {
+                            jsonObject.put("DeleteUser", "Write an username");
+                            jsonObject.put("function", "UserDeleted");
+
+                            message = jsonObject.toJSONString();
+                            b = message.getBytes();
+
+                            //Byte arrayen bliver sendt til klienten
+                            outToClient.write(b);
+                        }
                         break;
 
                     case "GetFriends":
@@ -184,7 +229,7 @@ public class CommunicateClient implements Runnable {
                         System.out.println("friends: " + getfriends);
 
                         //Listen bliver gemt i et JSONobejktet under KEY'en Data
-                        jsonObject.put("function", "alleVenner");
+                        jsonObject.put("function", "allFriends");
                         jsonObject.put("data", getfriends);
 
                         message = jsonObject.toJSONString();
@@ -195,6 +240,7 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Login":
+
                         System.out.println("Logging in");
                         AdministrateUser administrateUser = new AdministrateUser();
                         //checker om brugeren og kodeord er i databasen
@@ -212,7 +258,6 @@ public class CommunicateClient implements Runnable {
                             b = message.getBytes();
                             outToClient.write(b);
                         }
-
                         break;
 
                     case "Create user":
@@ -225,14 +270,14 @@ public class CommunicateClient implements Runnable {
                         Long jsonCount = (Long) jsonVersion.get("Count");
                         int Count = jsonCount.intValue();
 
-                        ArrayList<ChatLog> chatLogs = database.getChatLogs(getChatId(Count,owner,jsonUsername));
+                        ArrayList<ChatLog> chatLogs = database.getChatLogs(getChatId(Count, owner, jsonUsername));
 
                         ArrayList<String> logs = new ArrayList<>();
 
-                        for (ChatLog chatlog : chatLogs
-                             ) {
+                        for (ChatLog chatlog : chatLogs) {
                             logs.add(chatlog.getLog());
                         }
+
                         //laver et jsonobjekt til klienten
                         jsonObject.put("function", "ChatLogs");
                         jsonObject.put("Log", logs);
@@ -263,7 +308,7 @@ public class CommunicateClient implements Runnable {
         }*/
     }
 
-    public int getChatId(int count, String owner, String username){
+    public int getChatId(int count, String owner, String username) {
         return Integer.valueOf(database.getChatId(count, owner, username));
 
     }
