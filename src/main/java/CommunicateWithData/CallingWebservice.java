@@ -88,6 +88,34 @@ public class CallingWebservice {
         return allChats;
     }
 
+    public ArrayList<String> getGroupChat(String owner) {
+        GenericType<ArrayList<GroupChat>> groupList = new GenericType<ArrayList<GroupChat>>() {
+        };
+
+        ArrayList<GroupChat> allChats = target.path("chats").path("GroupChat").path(owner).request().get(groupList);
+
+        ArrayList<String> allGroups = new ArrayList<>();
+        for (GroupChat groupChat : allChats) {
+            allGroups.add(String.valueOf(groupChat.getGroupID()));
+        }
+
+        return allGroups;
+    }
+
+    public ArrayList<String> getGroupMembers(int id) {
+        GenericType<ArrayList<GroupChat>> groupList = new GenericType<ArrayList<GroupChat>>() {
+        };
+
+        ArrayList<GroupChat> allChats = target.path("chats").path("GroupMembers").path(String.valueOf(id)).request().get(groupList);
+
+        ArrayList<String> allGroups = new ArrayList<>();
+        for (GroupChat groupChat : allChats) {
+            allGroups.add(groupChat.getUsername());
+        }
+
+        return allGroups;
+    }
+
     public String getChatId(int count, String owner, String username){
         return target.path("chats").path(String.valueOf(count)).path(owner).path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
 

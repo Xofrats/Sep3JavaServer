@@ -3,11 +3,13 @@ package CommunikateWithClient;
 import CommunicateWithData.CallingWebservice;
 import CommunicateWithData.Chat;
 import CommunicateWithData.ChatLog;
+import CommunicateWithData.GroupChat;
 import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.json.bind.annotation.JsonbTransient;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -50,7 +52,6 @@ public class CommunicateClient implements Runnable {
                 //Objektet er et hashmap. En KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
                 String jsonUsername = (String) jsonVersion.get("Username");
-
                 String jsonPassword = (String) jsonVersion.get("Password");
 
 
@@ -71,6 +72,30 @@ public class CommunicateClient implements Runnable {
                         clients.writeToClient((String) jsonVersion.get("Username"), message);
                         break;
 
+                    case "Group chat":
+
+                        //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
+                        String ClientWroteToGroup = (String) jsonVersion.get("Chat");
+
+                        ArrayList<String> group = database.getGroupChat(owner);
+
+                        //laver json der skal sendes til den anden klient
+                        jsonObject.put("function", "chat group");
+                        jsonObject.put("data", ClientWroteToGroup);
+                        jsonObject.put("username", "2");
+
+                        //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
+                        message = jsonObject.toJSONString();
+                        ArrayList<String> members = database.getGroupMembers(Integer.valueOf((String) jsonVersion.get("Group")));
+
+                        System.out.println(members);
+
+                        for (String groupMembers: members) {
+                            System.out.println(groupMembers);
+                            clients.writeToClient(groupMembers, message);
+                        }
+                        break;
+
                     case "Send file":
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String file = (String) jsonVersion.get("Chat");
@@ -81,8 +106,6 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("File", file);
                         jsonObject.put("NameOfFile", fileName);
                         jsonObject.put("username", owner);
-
-                        System.out.println(file);
 
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
@@ -239,6 +262,26 @@ public class CommunicateClient implements Runnable {
 
                         break;
 
+                    case "Get groups":
+                        System.out.println("Getting groups from " + owner);
+
+                        //Den gemmer brugernavnene i en array
+                        ArrayList<String> getGroups = database.getGroupChat(owner);
+
+                        System.out.println("groups: " + getGroups);
+
+                        //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                        jsonObject.put("function", "allGroups");
+                        jsonObject.put("data", getGroups);
+
+                        message = jsonObject.toJSONString();
+                        b = message.getBytes();
+
+                        //Byte arrayen bliver sendt til klienten
+                        outToClient.write(b);
+
+                        break;
+
                     case "Login":
                         System.out.println("Logging in");
                         AdministrateUser administrateUser = new AdministrateUser();
@@ -271,7 +314,6 @@ public class CommunicateClient implements Runnable {
                         int Count = jsonCount.intValue();
 
                         ArrayList<ChatLog> chatLogs = database.getChatLogs(getChatId(Count, owner, jsonUsername));
-
                         ArrayList<String> logs = new ArrayList<>();
 
                         for (ChatLog chatlog : chatLogs) {
@@ -298,13 +340,7 @@ public class CommunicateClient implements Runnable {
             e.printStackTrace();
             System.out.println("Client disconnected");
 
-        } /*catch (ParseException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        }
     }
 
     public int getChatId(int count, String owner, String username) {
