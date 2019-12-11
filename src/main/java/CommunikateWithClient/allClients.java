@@ -23,11 +23,20 @@ public class allClients {
         allClients.put(username, socket);
     }
 
-    public void writeToClient(String username, String message){
-        try {
-            allClients.get(username).getOutputStream().write(message.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void removeClient(String username){
+        allClients.remove(username);
+    }
+
+    public void writeToClient(String username, String message) {
+        if (allClients.containsKey(username)) {
+            System.out.println("Got user");
+            try {
+                allClients.get(username).getOutputStream().write(message.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No client with that name");
         }
     }
 }
