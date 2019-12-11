@@ -9,7 +9,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import javax.json.bind.annotation.JsonbTransient;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ public class CommunicateClient implements Runnable {
     private Socket client;
     private String owner;
     private allClients clients = allClients.getallClientsInstance();
+    private  boolean running = true;
 
     public CommunicateClient(Socket client) {
         this.client = client;
@@ -41,19 +41,19 @@ public class CommunicateClient implements Runnable {
             OutputStream outToClient = client.getOutputStream();
             InputStream inFromClient = client.getInputStream();
             //Laver en buffer der kan omskrive json til data stream
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromClient, "US-ASCII"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromClient, "UTF-8"));
 
-            while (true) {
+            while (running) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
                 String clientWant = reader.readLine();
                 //Laver et JSON objekt ud fra streamen
                 JSONObject jsonVersion = (JSONObject) parser.parse(clientWant);
 
-                //Objektet er et hashmap. En KEY er function. Værdien der tilhører function bliver gemt i en string
+                //Objektet er et hashmap. En KEY er function. Værdien der tilhører function bliver gemt i en string.
+                //Function bliver hentet da den bliver brugt i switchen
                 String jsonString = (String) jsonVersion.get("Function");
+                //Username bliver hentet da den bliver brugt i de fleste cases
                 String jsonUsername = (String) jsonVersion.get("Username");
-                String jsonPassword = (String) jsonVersion.get("Password");
-
 
                 switch (jsonString) {
                     case "Chat":
@@ -125,21 +125,13 @@ public class CommunicateClient implements Runnable {
                                 jsonObject.put("SendFriendRequest", getRequest);
                                 jsonObject.put("function", "MyFriendRequest");
 
-                                message = jsonObject.toJSONString();
-                                b = message.getBytes();
-
-                                //Byte arrayen bliver sendt til klienten
-                                outToClient.write(b);
+                                sendJson(jsonObject);
                             }
                         } else {
                             jsonObject.put("SendFriendRequest", "Write an username");
                             jsonObject.put("function", "MyFriendRequest");
 
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         }
                         break;
 
@@ -151,11 +143,7 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("FriendRequest", request);
                         jsonObject.put("function", "friendList");
 
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
-
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                        sendJson(jsonObject);
                         break;
 
                     case "Accepted":
@@ -170,22 +158,14 @@ public class CommunicateClient implements Runnable {
                                 jsonObject.put("accepted", friend);
                                 jsonObject.put("function", "newFriend");
 
-                                message = jsonObject.toJSONString();
-                                b = message.getBytes();
-
-                                //Byte arrayen bliver sendt til klienten
-                                outToClient.write(b);
+                                sendJson(jsonObject);
                             }
                         } else {
                             //Listen bliver gemt i et JSONobejktet under KEY'en accepted
                             jsonObject.put("accepted", "The box is empty");
                             jsonObject.put("function", "newFriend");
 
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         }
                         break;
 
@@ -198,21 +178,13 @@ public class CommunicateClient implements Runnable {
                             jsonObject.put("RejectUser", reject);
                             jsonObject.put("function", "UserRejected");
 
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         } else {
                             //Listen bliver gemt i et JSONobejktet under KEY'en accepted
                             jsonObject.put("accepted", "The box is empty");
                             jsonObject.put("function", "newFriend");
 
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         }
                         break;
 
@@ -225,20 +197,12 @@ public class CommunicateClient implements Runnable {
                             jsonObject.put("DeleteUser", delete);
                             jsonObject.put("function", "UserDeleted");
 
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         } else {
                             jsonObject.put("DeleteUser", "Write an username");
                             jsonObject.put("function", "UserDeleted");
 
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-
-                            //Byte arrayen bliver sendt til klienten
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         }
                         break;
 
@@ -254,11 +218,7 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("function", "allFriends");
                         jsonObject.put("data", getfriends);
 
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
-
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                        sendJson(jsonObject);
 
                         break;
 
@@ -296,9 +256,7 @@ public class CommunicateClient implements Runnable {
                             //sætter trådens navn til den der loggede ind
                             owner = jsonUsername;
                             //Sender json til klienten
-                            message = jsonObject.toJSONString();
-                            b = message.getBytes();
-                            outToClient.write(b);
+                            sendJson(jsonObject);
                         }
 
                         break;
@@ -314,6 +272,7 @@ public class CommunicateClient implements Runnable {
                         int Count = jsonCount.intValue();
 
                         ArrayList<ChatLog> chatLogs = database.getChatLogs(getChatId(Count, owner, jsonUsername));
+
                         ArrayList<String> logs = new ArrayList<>();
 
                         for (ChatLog chatlog : chatLogs) {
@@ -325,9 +284,7 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("Username", jsonUsername);
                         System.out.println(jsonUsername);
 
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
-                        outToClient.write(b);
+                        sendJson(jsonObject);
 
                         break;
 
@@ -341,6 +298,27 @@ public class CommunicateClient implements Runnable {
             System.out.println("Client disconnected");
 
         }
+        } /*catch (ParseException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    public void sendJson(JSONObject jsonObject){
+        try{
+            OutputStream outToClient = client.getOutputStream();
+
+            message = jsonObject.toJSONString();
+            b = message.getBytes();
+            outToClient.write(b);
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
     }
 
     public int getChatId(int count, String owner, String username) {
