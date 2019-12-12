@@ -74,16 +74,18 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Group chat":
-
+                        System.out.println("case group chat");
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String ClientWroteToGroup = (String) jsonVersion.get("Chat");
-
-                        ArrayList<String> group = database.getGroupChat(owner);
+                        String groupnumber = (String) jsonVersion.get("Group");
 
                         //laver json der skal sendes til den anden klient
                         jsonObject.put("function", "chat group");
                         jsonObject.put("data", ClientWroteToGroup);
-                        jsonObject.put("username", "2");
+                        jsonObject.put("username", owner);
+                        jsonObject.put("groupnumber", groupnumber);
+
+                        database.addChatLog(Integer.valueOf(groupnumber), owner, ClientWroteToGroup);
 
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
@@ -91,9 +93,11 @@ public class CommunicateClient implements Runnable {
 
                         System.out.println(members);
 
-                        for (String groupMembers: members) {
-                            System.out.println(groupMembers);
-                            clients.writeToClient(groupMembers, message);
+                        for (String groupMember: members) {
+                            if (!(groupMember.equals(owner))) {
+                                System.out.println("Sending to " + groupMember);
+                                clients.writeToClient(groupMember, message);
+                            }
                         }
                         break;
 
@@ -280,18 +284,30 @@ public class CommunicateClient implements Runnable {
                         Long jsonCount = (Long) jsonVersion.get("Count");
                         int Count = jsonCount.intValue();
 
-                        ArrayList<ChatLog> chatLogs = database.getChatLogs(getChatId(Count, owner, jsonUsername));
+                        Long jsonGroupID = (Long) jsonVersion.get("GroupID");
+                        int GroupID = jsonGroupID.intValue();
+
+
+                        ArrayList<ChatLog> chatLogs;
+                        if (Count == 2) {
+                            chatLogs = database.getChatLogs(getChatId(Count, owner, jsonUsername));
+                            //laver et jsonobjekt til klienten
+                            jsonObject.put("function", "ChatLogs");
+                            jsonObject.put("Username", jsonUsername);
+                        } else {
+                            System.out.println("Group ID: " + GroupID);
+                            chatLogs = database.getChatLogs(GroupID);
+                            jsonObject.put("function", "ChatLogs");
+                            jsonObject.put("GroupID", GroupID);
+                        }
 
                         ArrayList<String> logs = new ArrayList<>();
 
                         for (ChatLog chatlog : chatLogs) {
                             logs.add(chatlog.getLog());
                         }
-                        //laver et jsonobjekt til klienten
-                        jsonObject.put("function", "ChatLogs");
                         jsonObject.put("Log", logs);
-                        jsonObject.put("Username", jsonUsername);
-                        System.out.println(jsonUsername);
+
 
                         sendJson(jsonObject);
 
@@ -304,16 +320,12 @@ public class CommunicateClient implements Runnable {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            allClients.getallClientsInstance().removeClient(owner);
             System.out.println("Client disconnected");
 
         }
-        } /*catch (ParseException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+
+    }
 
     public void sendJson(JSONObject jsonObject){
         try{
