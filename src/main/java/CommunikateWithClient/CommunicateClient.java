@@ -10,6 +10,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -275,8 +276,12 @@ public class CommunicateClient implements Runnable {
                         Long jsonCount = (Long) jsonVersion.get("Count");
                         int Count = jsonCount.intValue();
 
+                        System.out.println("Count is: " + Count);
+
                         Long jsonGroupID = (Long) jsonVersion.get("GroupID");
                         int GroupID = jsonGroupID.intValue();
+
+                        System.out.println("Group ID is: " + GroupID);
 
 
                         ArrayList<ChatLog> chatLogs;
@@ -302,6 +307,52 @@ public class CommunicateClient implements Runnable {
 
                         sendJson(jsonObject);
 
+                        break;
+
+                    case "VoiceChat":
+                        //Finder IP fra clienten
+                        String ip = (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/","");
+
+                        //laver json der skal sendes til den anden klient
+                        jsonObject.put("function", "VoiceChatRequest");
+                        jsonObject.put("username", owner);
+                        jsonObject.put("IP", ip);
+                        jsonObject.put("PORT", jsonVersion.get("Count"));
+
+                        System.out.println("IP address: " + (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/",""));
+
+                        //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
+                        message = jsonObject.toJSONString();
+                        clients.writeToClient(jsonUsername, message);
+
+
+                        break;
+
+                    case "VoiceChatAccept":
+                        //Finder IP fra clienten
+                        ip = (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/","");
+
+                        //laver json der skal sendes til den anden klient
+                        jsonObject.put("function", "VoiceChatAccept");
+                        jsonObject.put("username", owner);
+                        jsonObject.put("IP", ip);
+                        jsonObject.put("PORT", jsonVersion.get("Count"));
+
+                        System.out.println("IP address: " + (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/",""));
+                        System.out.println("Port is " + jsonVersion.get("Count"));
+                        //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
+                        message = jsonObject.toJSONString();
+                        clients.writeToClient(jsonUsername, message);
+
+
+                        break;
+
+                    case "VoiceChatReject":
+                        jsonObject.put("function", "VoiceChatAccept");
+                        jsonObject.put("username", owner);
+
+                        message = jsonObject.toJSONString();
+                        clients.writeToClient(jsonUsername, message);
                         break;
 
                     default:
