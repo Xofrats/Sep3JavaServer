@@ -3,6 +3,7 @@ package CommunikateWithClient;
 import CommunicateWithData.CallingWebservice;
 import CommunicateWithData.Chat;
 import CommunicateWithData.ChatLog;
+import CommunicateWithData.User;
 import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -50,7 +51,6 @@ public class CommunicateClient implements Runnable {
                 //Objektet er et hashmap. En KEY er function. Værdien der tilhører function bliver gemt i en string
                 String jsonString = (String) jsonVersion.get("Function");
                 String jsonUsername = (String) jsonVersion.get("Username");
-
                 String jsonPassword = (String) jsonVersion.get("Password");
 
 
@@ -260,10 +260,11 @@ public class CommunicateClient implements Runnable {
 
                         break;
 
-                    case "Create user":
+                    case "create user":
 
-                        //bruger metode fra webservice
-                        //String create = database.createUser(jsonUsername, jsonPassword);
+                        User user = new User(jsonUsername,jsonPassword);
+                        database.createUser(user.getUsername(),user.getPassword());
+                        System.out.println(user);
                         break;
 
                     case "Get Chatlog":

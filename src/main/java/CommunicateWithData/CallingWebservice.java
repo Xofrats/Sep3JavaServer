@@ -1,6 +1,7 @@
 package CommunicateWithData;
 
 import org.glassfish.jersey.client.ClientConfig;
+import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -107,16 +108,15 @@ public class CallingWebservice {
         target.path("chats").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(log));
 
     }
+    
+    public void createUser(String username, String password) {
+        User user = new User(username,password);
+        System.out.println(target.path("users").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(user)));
 
-    /*public String createUser(String username, String password) {
-
-        String request = "username=" + username + "&password=" + password;
 
 
-        return target.path("/users").path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(request)).toString();
-    }*/
-    public String createUser(String owner, String username, User user) {
-        return target.path("/users").path(owner).path(username).request(MediaType.APPLICATION_JSON).post(Entity.json(user)).readEntity(String.class);
+
+
     }
 
 
