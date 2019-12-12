@@ -54,6 +54,7 @@ public class CommunicateClient implements Runnable {
                 String jsonString = (String) jsonVersion.get("Function");
                 //Username bliver hentet da den bliver brugt i de fleste cases
                 String jsonUsername = (String) jsonVersion.get("Username");
+                String jsonPassword = (String) jsonVersion.get("Password");
 
                 switch (jsonString) {
                     case "Chat":
@@ -243,19 +244,27 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Login":
-                        System.out.println("Logging in");
-                        AdministrateUser administrateUser = new AdministrateUser();
-                        //checker om brugeren og kodeord er i databasen
-                        if (administrateUser.logIn(jsonUsername, (String) jsonVersion.get("Password"))) {
 
-                            //laver et jsonobjekt til klienten
+                        if (jsonUsername != null && !jsonUsername.isEmpty() && jsonPassword != null && !jsonPassword.isEmpty()) {
+                            System.out.println("Logging in");
+                            AdministrateUser administrateUser = new AdministrateUser();
+                            //checker om brugeren og kodeord er i databasen
+                            if (administrateUser.logIn(jsonUsername, (String) jsonVersion.get("Password"))) {
+
+                                //laver et jsonobjekt til klienten
+                                jsonObject.put("function", "Login");
+                                jsonObject.put("data", "Valid");
+                                //Gemmer socket med tilhørende brugernavn
+                                clients.addClient(jsonUsername, client);
+                                //sætter trådens navn til den der loggede ind
+                                owner = jsonUsername;
+                                //Sender json til klienten
+                                sendJson(jsonObject);
+                            }
+                        } else {
+                            jsonObject.put("data", "Fill out the field(s)");
                             jsonObject.put("function", "Login");
-                            jsonObject.put("data", "Valid");
-                            //Gemmer socket med tilhørende brugernavn
-                            clients.addClient(jsonUsername, client);
-                            //sætter trådens navn til den der loggede ind
-                            owner = jsonUsername;
-                            //Sender json til klienten
+
                             sendJson(jsonObject);
                         }
 
@@ -305,7 +314,6 @@ public class CommunicateClient implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-    }
 
     public void sendJson(JSONObject jsonObject){
         try{
