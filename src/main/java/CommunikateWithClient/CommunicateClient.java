@@ -357,7 +357,7 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "VoiceChatReject":
-                        jsonObject.put("function", "VoiceChatAccept");
+                        jsonObject.put("function", "VoiceChatReject");
                         jsonObject.put("username", owner);
 
                         message = jsonObject.toJSONString();
