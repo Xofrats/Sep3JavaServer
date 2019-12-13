@@ -9,10 +9,17 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.imageio.ImageReader;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import static javax.imageio.ImageIO.createImageInputStream;
+import static javax.imageio.ImageIO.getImageReader;
+import static javax.imageio.ImageIO.read;
 
 public class CommunicateClient implements Runnable {
     private Socket client;
@@ -56,6 +63,7 @@ public class CommunicateClient implements Runnable {
                 //Username bliver hentet da den bliver brugt i de fleste cases
                 String jsonUsername = (String) jsonVersion.get("Username");
                 String jsonPassword = (String) jsonVersion.get("Password");
+                String jsonPicture = (String) jsonVersion.get("picture");
 
                 switch (jsonString) {
                     case "Chat":
@@ -102,7 +110,17 @@ public class CommunicateClient implements Runnable {
                         }
                         break;
 
-                    case "Send file":
+                    case "save profile picture":
+
+                        System.out.println("her");
+                        createImageInputStream(jsonPicture);
+                        System.out.println(jsonPicture);
+
+
+
+
+
+                        case "Send file":
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String file = (String) jsonVersion.get("Chat");
                         String fileName = (String) jsonVersion.get("fileName");

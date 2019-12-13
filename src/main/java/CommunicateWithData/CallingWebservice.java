@@ -141,10 +141,6 @@ public class CallingWebservice {
         User user = new User(username,password);
         System.out.println(target.path("users").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(user)));
 
-
-
-
-
     }
 
 
