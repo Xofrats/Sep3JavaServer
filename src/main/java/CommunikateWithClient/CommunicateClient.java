@@ -394,10 +394,10 @@ public class CommunicateClient implements Runnable {
                     case "Remove user":
 
                         if (jsonUsername != null && !jsonUsername.isEmpty()) {
-                            String user = database.removeUser(group, jsonUsername, false);
-                            System.out.println(user);
+                            String user1 = database.removeUser(group, jsonUsername, false);
+                            System.out.println(user1);
 
-                            jsonObject.put("data", user);
+                            jsonObject.put("data", user1);
                             jsonObject.put("function", "Member");
 
                             sendJson(jsonObject);
