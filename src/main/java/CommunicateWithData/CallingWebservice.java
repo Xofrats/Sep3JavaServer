@@ -130,10 +130,23 @@ public class CallingWebservice {
         return allChatLogs;
     }
 
-    public void addChatLog(int chatID, String username, String message){
+    public int addChat(String chatname) {
+        return target.path("chats").path("CreateChat").path(chatname).request().accept(MediaType.APPLICATION_JSON).post(Entity.json(chatname)).readEntity(Integer.TYPE);
+    }
+
+    public String addMemberToChat(int chatID, String username, boolean admin) {
+        GroupChat groupChat = new GroupChat(chatID, username, admin);
+        return target.path("chats").path("AddMember").path(String.valueOf(chatID)).path(username).path(String.valueOf(admin)).request().accept(MediaType.APPLICATION_JSON).post(Entity.json(groupChat)).readEntity(String.class);
+    }
+
+    public void addChatLog(int chatID, String username, String message) {
         ChatLog log = new ChatLog(chatID, username,message);
         target.path("chats").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(log));
 
+    }
+
+    public String removeUser(int chatID, String username, boolean admin) {
+        return target.path("chats").path("RemoveMember").path(String.valueOf(chatID)).path(username).path(String.valueOf(admin)).request().accept(MediaType.APPLICATION_JSON).delete().readEntity(String.class);
     }
 
     /*public String createUser(String username, String password) {
