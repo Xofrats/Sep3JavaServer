@@ -375,10 +375,10 @@ public class CommunicateClient implements Runnable {
                     case "Add user":
 
                         if (jsonUsername != null && !jsonUsername.isEmpty()) {
-                            String user = database.addMemberToChat(group, jsonUsername, false);
-                            System.out.println(user);
+                            String userAdd = database.addMemberToChat(group, jsonUsername, false);
+                            System.out.println(userAdd);
 
-                            jsonObject.put("data", user);
+                            jsonObject.put("data", userAdd);
                             jsonObject.put("function", "Member");
 
                             sendJson(jsonObject);

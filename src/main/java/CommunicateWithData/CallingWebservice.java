@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class CallingWebservice {
 
-    private  ClientConfig config = new ClientConfig();
+    private ClientConfig config = new ClientConfig();
     private Client client;
     private WebTarget target;
 
@@ -117,7 +117,7 @@ public class CallingWebservice {
         return allGroups;
     }
 
-    public String getChatId(int count, String owner, String username){
+    public String getChatId(int count, String owner, String username) {
         return target.path("chats").path(String.valueOf(count)).path(owner).path(username).request().accept(MediaType.APPLICATION_JSON).get(String.class);
 
     }
@@ -126,7 +126,7 @@ public class CallingWebservice {
         GenericType<ArrayList<ChatLog>> userArrayListType = new GenericType<ArrayList<ChatLog>>() {
         };
 
-        ArrayList<ChatLog> allChatLogs = target.path("chats").path( String.valueOf(chatID)).request().get(userArrayListType);
+        ArrayList<ChatLog> allChatLogs = target.path("chats").path(String.valueOf(chatID)).request().get(userArrayListType);
 
         return allChatLogs;
     }
@@ -141,7 +141,7 @@ public class CallingWebservice {
     }
 
     public void addChatLog(int chatID, String username, String message) {
-        ChatLog log = new ChatLog(chatID, username,message);
+        ChatLog log = new ChatLog(chatID, username, message);
         target.path("chats").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(log));
 
     }
@@ -150,9 +150,9 @@ public class CallingWebservice {
         User user = new User(username, password);
         System.out.println(target.path("users").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(user)));
 
-        public String removeUser ( int chatID, String username,boolean admin){
-            return target.path("chats").path("RemoveMember").path(String.valueOf(chatID)).path(username).path(String.valueOf(admin)).request().accept(MediaType.APPLICATION_JSON).delete().readEntity(String.class);
-        }
     }
 
+    public String removeUser(int chatID, String username, boolean admin) {
+        return target.path("chats").path("RemoveMember").path(String.valueOf(chatID)).path(username).path(String.valueOf(admin)).request().accept(MediaType.APPLICATION_JSON).delete().readEntity(String.class);
+    }
 }
