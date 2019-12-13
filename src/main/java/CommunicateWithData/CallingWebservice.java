@@ -152,7 +152,7 @@ public class CallingWebservice {
 
     }
 
-    public String removeUser(int chatID, String username, boolean admin) {
-        return target.path("chats").path("RemoveMember").path(String.valueOf(chatID)).path(username).path(String.valueOf(admin)).request().accept(MediaType.APPLICATION_JSON).delete().readEntity(String.class);
+    public String removeUser(int chatID, String username) {
+        return target.path("chats").path("RemoveMember").path(String.valueOf(chatID)).path(username).request().accept(MediaType.APPLICATION_JSON).delete().readEntity(String.class);
     }
 }
