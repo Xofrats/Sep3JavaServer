@@ -10,7 +10,7 @@ public class Main {
         new Thread(StartListening).start();
 
         CallingWebservice data = new CallingWebservice();
-
+        System.out.println("user is " + data.getUser("Bob"));
        //System.out.println("new chat: " + data.getChatId(2, "CT", "morten"));
         /*System.out.println(data.getAllFriends("Sitch"));
 

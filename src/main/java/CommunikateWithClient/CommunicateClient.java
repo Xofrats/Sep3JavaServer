@@ -1,9 +1,6 @@
 package CommunikateWithClient;
 
-import CommunicateWithData.CallingWebservice;
-import CommunicateWithData.Chat;
-import CommunicateWithData.ChatLog;
-import CommunicateWithData.GroupChat;
+import CommunicateWithData.*;
 import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -265,13 +262,12 @@ public class CommunicateClient implements Runnable {
                                 owner = jsonUsername;
                                 //Sender json til klienten
                                 sendJson(jsonObject);
+                            } else
+                            {
+                                jsonObject.put("function", "Login");
                             }
-                        } else {
-                            jsonObject.put("data", "Fill out the field(s)");
-                            jsonObject.put("function", "Login");
-
-                            sendJson(jsonObject);
                         }
+                        sendJson(jsonObject);
 
                         break;
 
