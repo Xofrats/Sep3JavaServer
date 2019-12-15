@@ -6,16 +6,24 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.imageio.ImageReader;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import static javax.imageio.ImageIO.createImageInputStream;
+import static javax.imageio.ImageIO.getImageReader;
+import static javax.imageio.ImageIO.read;
+
 public class CommunicateClient implements Runnable {
     private Socket client;
     private String owner;
+    private int group;
     private allClients clients = allClients.getallClientsInstance();
-    private  boolean running = true;
+    private boolean running = true;
 
     public CommunicateClient(Socket client) {
         this.client = client;
@@ -53,6 +61,7 @@ public class CommunicateClient implements Runnable {
                 //Username bliver hentet da den bliver brugt i de fleste cases
                 String jsonUsername = (String) jsonVersion.get("Username");
                 String jsonPassword = (String) jsonVersion.get("Password");
+                String jsonPicture = (String) jsonVersion.get("picture");
 
                 switch (jsonString) {
                     case "Chat":
@@ -99,7 +108,17 @@ public class CommunicateClient implements Runnable {
                         }
                         break;
 
-                    case "Send file":
+                    case "save profile picture":
+
+                        System.out.println("her");
+                        createImageInputStream(jsonPicture);
+                        System.out.println(jsonPicture);
+
+
+
+
+
+                        case "Send file":
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String file = (String) jsonVersion.get("Chat");
                         String fileName = (String) jsonVersion.get("fileName");
@@ -237,21 +256,32 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("function", "allGroups");
                         jsonObject.put("data", getGroups);
 
-                        message = jsonObject.toJSONString();
-                        b = message.getBytes();
+                        sendJson(jsonObject);
 
-                        //Byte arrayen bliver sendt til klienten
-                        outToClient.write(b);
+                        break;
+
+                    case "Get members":
+
+                        //Den gemmer brugernavnene i en array
+                        ArrayList<String> getMembers = database.getGroupMembers(group);
+
+                        System.out.println("group member: " + getMembers);
+
+                        //Listen bliver gemt i et JSONobejktet under KEY'en Data
+                        jsonObject.put("function", "allMembers");
+                        jsonObject.put("data", getMembers);
+
+                        sendJson(jsonObject);
 
                         break;
 
                     case "Login":
 
-                        if (jsonUsername != null && !jsonUsername.isEmpty() && jsonPassword != null && !jsonPassword.isEmpty()) {
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
                             System.out.println("Logging in");
                             AdministrateUser administrateUser = new AdministrateUser();
                             //checker om brugeren og kodeord er i databasen
-                            if (administrateUser.logIn(jsonUsername, (String) jsonVersion.get("Password"))) {
+                            if (administrateUser.logIn(jsonUsername, jsonPassword)) {
 
                                 //laver et jsonobjekt til klienten
                                 jsonObject.put("function", "Login");
@@ -271,10 +301,25 @@ public class CommunicateClient implements Runnable {
 
                         break;
 
-                    case "Create user":
+                    case "create user":
 
-                        //bruger metode fra webservice
-                        //String create = database.createUser(jsonUsername, jsonPassword);
+                        if (jsonUsername != null && !jsonUsername.isEmpty() && jsonPassword != null && !jsonPassword.isEmpty()) {
+                            User user = new User(jsonUsername, jsonPassword);
+                            String create = database.createUser(user.getUsername(), user.getPassword());
+
+                            System.out.println(create);
+
+                            jsonObject.put("data", create);
+                            jsonObject.put("function", "Create User");
+
+                            sendJson(jsonObject);
+                        } else {
+                            jsonObject.put("data", "Fill the empty field(s)");
+                            jsonObject.put("function", "Create User");
+
+                            sendJson(jsonObject);
+                        }
+
                         break;
 
                     case "Get Chatlog":
@@ -285,6 +330,7 @@ public class CommunicateClient implements Runnable {
 
                         Long jsonGroupID = (Long) jsonVersion.get("GroupID");
                         int GroupID = jsonGroupID.intValue();
+                        group = GroupID;
 
                         System.out.println("Group ID is: " + GroupID);
 
@@ -312,6 +358,65 @@ public class CommunicateClient implements Runnable {
 
                         sendJson(jsonObject);
 
+                        break;
+
+                    case "Create group":
+
+                        if (jsonVersion.get("Group") != null && !((String) jsonVersion.get("Group")).isEmpty()) {
+                            int groupID = database.addChat((String) jsonVersion.get("Group"));
+                            group = groupID;
+                            database.addMemberToChat(group, owner, true);
+
+                            jsonObject.put("data", "Group created");
+                            jsonObject.put("function", "GroupCreated");
+
+                            sendJson(jsonObject);
+
+                        } else {
+                            jsonObject.put("data", "Write a name for the group");
+                            jsonObject.put("function", "GroupCreated");
+
+                            sendJson(jsonObject);
+                        }
+
+                        break;
+
+                    case "Add user":
+
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
+                            String userAdd = database.addMemberToChat(group, jsonUsername, false);
+                            System.out.println(userAdd);
+
+                            jsonObject.put("data", userAdd);
+                            jsonObject.put("function", "Member");
+
+                            sendJson(jsonObject);
+
+                        } else {
+                            jsonObject.put("data", "Write an username");
+                            jsonObject.put("function", "Member");
+
+                            sendJson(jsonObject);
+                        }
+                        break;
+
+                    case "Remove user":
+
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
+                            String user1 = database.removeUser(group, jsonUsername);
+                            System.out.println(user1);
+
+                            jsonObject.put("data", user1);
+                            jsonObject.put("function", "Member");
+
+                            sendJson(jsonObject);
+
+                        } else {
+                            jsonObject.put("data", "Write an username");
+                            jsonObject.put("function", "Member");
+
+                            sendJson(jsonObject);
+                        }
                         break;
 
                     case "VoiceChat":
@@ -374,15 +479,15 @@ public class CommunicateClient implements Runnable {
 
     }
 
-    public void sendJson(JSONObject jsonObject){
-        try{
+    public void sendJson(JSONObject jsonObject) {
+        try {
             OutputStream outToClient = client.getOutputStream();
 
             message = jsonObject.toJSONString();
             b = message.getBytes();
             outToClient.write(b);
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
