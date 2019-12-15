@@ -281,12 +281,13 @@ public class CommunicateClient implements Runnable {
 
                     case "Login":
 
-                        if (jsonUsername != null && !jsonUsername.isEmpty() && jsonPassword != null && !jsonPassword.isEmpty()) {
+                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
                             System.out.println("Logging in");
                             AdministrateUser administrateUser = new AdministrateUser();
                             //checker om brugeren og kodeord er i databasen
                             if (administrateUser.logIn(jsonUsername, jsonPassword)) {
 
+                                System.out.println("Should log in");
                                 //laver et jsonobjekt til klienten
                                 jsonObject.put("function", "Login");
                                 jsonObject.put("data", "Valid");
@@ -308,9 +309,23 @@ public class CommunicateClient implements Runnable {
 
                     case "create user":
 
-                        User user = new User(jsonUsername,jsonPassword);
-                        database.createUser(user.getUsername(),user.getPassword());
-                        System.out.println(user);
+                        if (jsonUsername != null && !jsonUsername.isEmpty() && jsonPassword != null && !jsonPassword.isEmpty()) {
+                            User user = new User(jsonUsername, jsonPassword);
+                            String create = database.createUser(user.getUsername(), user.getPassword());
+
+                            System.out.println(create);
+
+                            jsonObject.put("data", create);
+                            jsonObject.put("function", "Create User");
+
+                            sendJson(jsonObject);
+                        } else {
+                            jsonObject.put("data", "Fill the empty field(s)");
+                            jsonObject.put("function", "Create User");
+
+                            sendJson(jsonObject);
+                        }
+
                         break;
 
                     case "Get Chatlog":
