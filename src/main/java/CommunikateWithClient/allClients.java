@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 
-public class allClients {
+public class allClients implements IWriteToClients {
 
     private HashMap<String, Socket> allClients = new HashMap<>();
 
@@ -17,6 +17,10 @@ public class allClients {
             clientsinst = new allClients();
         }
         return clientsinst;
+    }
+
+    public HashMap<String, Socket> getAllClients() {
+        return allClients;
     }
 
     public void addClient(String username, Socket socket){

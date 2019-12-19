@@ -1,7 +1,7 @@
 package CommunicateWithData;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
+
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;

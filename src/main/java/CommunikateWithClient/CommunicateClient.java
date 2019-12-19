@@ -1,53 +1,49 @@
 package CommunikateWithClient;
 
-import CommunicateWithData.*;
+import CommunicateWithData.CallingWebservice;
+import CommunicateWithData.ChatLog;
+import CommunicateWithData.User;
 import Server.AdministrateUser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import javax.imageio.ImageReader;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import static javax.imageio.ImageIO.createImageInputStream;
-import static javax.imageio.ImageIO.getImageReader;
-import static javax.imageio.ImageIO.read;
 
 public class CommunicateClient implements Runnable {
     private Socket client;
     private String owner;
     private int group;
     private allClients clients = allClients.getallClientsInstance();
-    private boolean running = true;
 
     public CommunicateClient(Socket client) {
         this.client = client;
     }
     //Laver et json objekt der kan sendes over stream
-    JSONObject jsonObject = new JSONObject();
+   private JSONObject jsonObject = new JSONObject();
 
     //JSONparser kan oversætte JSON fra streamen til java
-    JSONParser parser = new JSONParser();
+   private JSONParser parser = new JSONParser();
 
     //Serveren laver et objekt der kan snakke med webservicen
-    CallingWebservice database = new CallingWebservice();
+    private CallingWebservice database = new CallingWebservice();
 
-    byte[] b = new byte[1024];
-    String message;
+    private String message;
+    private boolean running = true;
 
     public void run() {
 
         try {
-            //henter clientens streams
-            OutputStream outToClient = client.getOutputStream();
+            //henter clientens stream
             InputStream inFromClient = client.getInputStream();
             //Laver en buffer der kan omskrive json til data stream
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromClient, "UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromClient, StandardCharsets.UTF_8));
+
 
             while (running) {
                 //Så længe tråden kører venter serveren på inputs fra klienten
@@ -60,7 +56,7 @@ public class CommunicateClient implements Runnable {
                 String jsonString = (String) jsonVersion.get("Function");
                 //Username bliver hentet da den bliver brugt i de fleste cases
                 String jsonUsername = (String) jsonVersion.get("Username");
-                String jsonPassword = (String) jsonVersion.get("Password");
+
                 String jsonPicture = (String) jsonVersion.get("picture");
 
                 switch (jsonString) {
@@ -74,7 +70,9 @@ public class CommunicateClient implements Runnable {
                         jsonObject.put("data", WhatClientWrote);
                         jsonObject.put("username", owner);
 
+                        //TIlføjer message til databasen
                         database.addChatLog(getChatId(2, owner, jsonUsername), owner, WhatClientWrote);
+
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
                         clients.writeToClient((String) jsonVersion.get("Username"), message);
@@ -82,6 +80,7 @@ public class CommunicateClient implements Runnable {
 
                     case "Group chat":
                         System.out.println("case group chat");
+
                         //Hvis brugeren vil chat, finder serveren KEY'en Chat og gemmer dens værdi
                         String ClientWroteToGroup = (String) jsonVersion.get("Chat");
                         String groupnumber = (String) jsonVersion.get("Group");
@@ -96,6 +95,7 @@ public class CommunicateClient implements Runnable {
 
                         //JSON objektet bliver lavet om til en string og sendes til objektet der holder styr på alle klienter
                         message = jsonObject.toJSONString();
+
                         ArrayList<String> members = database.getGroupMembers(Integer.valueOf((String) jsonVersion.get("Group")));
 
                         System.out.println(members);
@@ -113,9 +113,6 @@ public class CommunicateClient implements Runnable {
                         System.out.println("her");
                         createImageInputStream(jsonPicture);
                         System.out.println(jsonPicture);
-
-
-
 
 
                         case "Send file":
@@ -147,14 +144,14 @@ public class CommunicateClient implements Runnable {
                                 jsonObject.put("SendFriendRequest", getRequest);
                                 jsonObject.put("function", "MyFriendRequest");
 
-                                sendJson(jsonObject);
                             }
                         } else {
                             jsonObject.put("SendFriendRequest", "Write an username");
                             jsonObject.put("function", "MyFriendRequest");
 
-                            sendJson(jsonObject);
                         }
+
+                        sendJson(jsonObject);
                         break;
 
                     case "friend request":
@@ -276,8 +273,8 @@ public class CommunicateClient implements Runnable {
                         break;
 
                     case "Login":
+                        String jsonPassword = (String) jsonVersion.get("Password");
 
-                        if (jsonUsername != null && !jsonUsername.isEmpty()) {
                             System.out.println("Logging in");
                             AdministrateUser administrateUser = new AdministrateUser();
                             //checker om brugeren og kodeord er i databasen
@@ -296,12 +293,13 @@ public class CommunicateClient implements Runnable {
                             {
                                 jsonObject.put("function", "Login");
                             }
-                        }
+
                         sendJson(jsonObject);
 
                         break;
 
                     case "create user":
+                        jsonPassword = (String) jsonVersion.get("Password");
 
                         if (jsonUsername != null && !jsonUsername.isEmpty() && jsonPassword != null && !jsonPassword.isEmpty()) {
                             User user = new User(jsonUsername, jsonPassword);
@@ -484,7 +482,7 @@ public class CommunicateClient implements Runnable {
             OutputStream outToClient = client.getOutputStream();
 
             message = jsonObject.toJSONString();
-            b = message.getBytes();
+            byte[] b = message.getBytes();
             outToClient.write(b);
 
         } catch (IOException e) {
